@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EV Charging Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #4CAF50 100%);
+            color: #333;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #4CAF50;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2E7D32;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo::before {
+            content: "⚡";
+            font-size: 32px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 30px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #2E7D32;
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+            height: calc(100vh - 80px);
+        }
+
+        .stations-section {
+            flex: 2.5;
+            display: flex;
+            gap: 15px;
+            align-items: stretch;
+        }
+
+        .station {
+            flex: 1;
+            min-width: 280px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(76, 175, 80, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            height: fit-content;
+            opacity: 0.7;
+        }
+
+        .station:hover {
+            background: rgba(255, 255, 255, 0.98);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(255, 152, 0, 0.2);
+            border-color: #FF9800;
+        }
+
+        .station-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .station-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2E7D32;
+            margin-bottom: 5px;
+        }
+
+        .station-location {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            background: #FFF3E0;
+            color: #F57C00;
+            border: 1px solid #FF9800;
+        }
+
+        .coupon-section {
+            text-align: center;
+            margin: 15px 0;
+            height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .discount-banner {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .coupon-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 12px;
+            object-fit: cover;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 3px solid #4CAF50;
+        }
+
+        .no-coupon-placeholder {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #ccc;
+            color: #999;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        .no-coupon-icon {
+            font-size: 35px;
+            margin-bottom: 6px;
+        }
+
+        .maintenance-notice {
+            background: rgba(255, 193, 7, 0.1);
+            border: 2px solid #FFC107;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .maintenance-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .maintenance-text {
+            color: #F57C00;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .occupied-message {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            margin-top: auto;
+            padding: 20px;
+            background: rgba(255, 152, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .sidebar {
+            flex: 1;
+            min-width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .battery-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .battery-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2E7D32;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .battery-level {
+            font-size: 32px;
+            font-weight: 700;
+            color: #4CAF50;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .charge-indicator {
+            background: #E0E0E0;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            position: relative;
+            border: 1px solid #333;
+        }
+
+        .charge-level {
+            height: 100%;
+            background: linear-gradient(90deg, #FF5722 0%, #FF9800 50%, #4CAF50 100%);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .charge-level::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .controls-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(76, 175, 80, 0.3);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .drive-btn {
+            background: linear-gradient(135deg, #607D8B, #546E7A);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .drive-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(96, 125, 139, 0.3);
+        }
+
+        .feedback {
+            color: #F44336;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 15px;
+            min-height: 20px;
+        }
+
+        .help-btn {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .help-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.3);
+        }
+
+        #help-section {
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #help-text {
+            width: 100%;
+            height: 80px;
+            padding: 10px;
+            border: 2px solid #E0E0E0;
+            border-radius: 10px;
+            resize: none;
+            font-family: inherit;
+            margin-bottom: 10px;
+        }
+
+        #help-text:focus {
+            outline: none;
+            border-color: #2196F3;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        .submit-help-btn {
+            background: linear-gradient(135deg, #4CAF50, #45A049);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #submission-message {
+            display: none;
+            background: #E8F5E8;
+            color: #2E7D32;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border: 1px solid #4CAF50;
+            text-align: center;
+            font-weight: 600;
+        }
+    </style>
+    <script type="text/javascript" src="/static/js/TobiiWeb_Client.js"></script>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">EV Charging Network</div>
+        <div class="stats">
+            <div class="stat-item">
+                <span>💰</span>
+                <span>Points: {{ points|int }}</span>
+            </div>
+            <div class="stat-item">
+                <span>🔄</span>
+                <span>Station: {{ trial }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="stations-section">
+            {% for station in stations %}
+            <div class="station">
+                <div class="station-header">
+                    <div class="station-name">{{ station.name }}</div>
+                    <span class="status-badge status-occupied">
+                        Occupied
+                    </span>
+                </div>
+
+                <!-- <div class="coupon-section">
+                    {% if image_prob %}
+                    <div class="discount-banner">🎉 Special 10% Discount Available!</div> 
+                    <img src="{{ url_for('get_image', filename=station.image) }}" alt="Discount Coupon" class="coupon-image">
+                    {% else %}
+                    <div class="no-coupon-placeholder">
+                        <div class="no-coupon-icon">🎫</div>
+                        <div>No Active<br>Promotions</div>
+                    </div>
+                    {% endif %}
+                </div> -->
+
+                <div class="maintenance-notice">
+                    <span class="maintenance-icon">⛔</span>
+                    <div class="maintenance-text">Kiosk Currently Occupied</div>
+                </div>
+
+                <div class="occupied-message">
+                    <p>🚫 Station is currently occupied</p>
+                    <p>Please go to another station</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="sidebar">
+            <div class="battery-section">
+                <div class="battery-title">🔋 Vehicle Battery Status</div>
+                <div class="battery-level">{{ current_charge|int }}%</div>
+                <div class="charge-indicator">
+                    <div class="charge-level" style="width: {{ current_charge }}%;"></div>
+                </div>
+            </div>
+
+            <div class="controls-section">
+                <button onclick="handleSkipCharging()" class="drive-btn">🚗 Drive to Next Station</button>
+                
+                <div class="feedback">{{ feedback }}</div>
+                
+                <button onclick="handleHelpClick()" class="help-btn">🆘 Need Help?</button>
+                
+                <div id="help-section">
+                    <textarea id="help-text" placeholder="Describe your issue or concern here..."></textarea>
+                    <button onclick="submitHelp()" class="submit-help-btn">Submit Request</button>
+                </div>
+                
+                <div id="submission-message">
+                    ✅ We have received your concern and sincerely apologize for any inconvenience. Please drive to the next station. Thank you for your patience.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let socket;
+
+        // Check if the WebSocket connection exists in sessionStorage
+        if (sessionStorage.getItem('socket') === 'connected') {
+            socket = new WebSocket('ws://localhost:8080');
+            socket.onopen = () => console.log('WebSocket connection reused.');
+
+            // Start Tobii EyeX tracking if WebSocket exists
+            TobiiWeb_Client.start({
+                enable_state_machine_logs: true,
+                use_filter: "mean",
+                services: [
+                    { name: "GazeTracking_Service", page_url: window.location.href }
+                ],
+                onMessage: {
+                    "GazeTracking_Service": GazeCoordinatesReceiver({
+                        filter: "mean",
+                        filter_size: 5,
+                        onGazeCoordinates: function (x, y) {
+                            const timeStamp = new Date().getTime();
+                            const dateTimeStamp = new Date().toISOString();
+                            const data = { x_axis: x, y_axis: y, timestamp: timeStamp, datetimestamp: dateTimeStamp };
+
+                            // Send gaze data to the server
+                            if (socket && socket.readyState === WebSocket.OPEN) {
+                                socket.send(JSON.stringify(data));
+                            }
+                        }
+                    })
+                }
+            });
+        } else {
+            console.log('No active WebSocket connection.');
+        }
+
+        function handleHelpClick() {
+            const helpSection = document.getElementById('help-section');
+            helpSection.style.display = helpSection.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function submitHelp() {
+            const helpText = document.getElementById('help-text').value;
+            const trialNumber = "{{ trial }}";
+            fetch('/help_submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ help_text: helpText, trial: trialNumber })
+            }).then(response => response.json())
+              .then(data => {
+                  const message = document.getElementById('submission-message');
+                  message.style.display = 'block';
+                  document.getElementById('help-section').style.display = 'none';
+              });
+        }
+
+        function handleSkipCharging() {
+            window.location.href = "/driving?skip_charging=true";
+        }
+
+        // Handle feedback text processing
+        let text = document.querySelector(".feedback").textContent;
+        let substringToRemove = "Charge lost due to driving: ";
+
+        // Add some visual feedback for disabled elements
+        document.addEventListener('DOMContentLoaded', function() {
+            const disabledInputs = document.querySelectorAll('input:disabled');
+            disabledInputs.forEach(input => {
+                input.addEventListener('click', function() {
+                    this.style.border = '2px solid #FFC107';
+                    setTimeout(() => {
+                        this.style.border = '2px solid #E0E0E0';
+                    }, 1000);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

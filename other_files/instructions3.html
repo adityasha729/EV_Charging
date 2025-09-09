@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EV Charging Simulation - Instructions</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"/>
+  <script type="text/javascript" src="/static/js/TobiiWeb_Client.js"></script>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #65f771, #a924f6);
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background: #ffffff;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 128, 0, 0.2);
+      animation: fadeIn 1.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      text-align: center;
+      color: #1b5e20;
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      color: #2e7d32;
+      font-size: 24px;
+      margin-bottom: 15px;
+      margin-top: 30px;
+    }
+
+    h3 {
+      color: #388e3c;
+      font-size: 20px;
+      margin-bottom: 10px;
+      margin-top: 25px;
+    }
+
+    p {
+      font-size: 17px;
+      line-height: 1.6;
+      color: #333;
+      margin-bottom: 15px;
+    }
+
+    ul {
+      padding-left: 20px;
+      margin-bottom: 20px;
+    }
+
+    li {
+      margin-bottom: 8px;
+      font-size: 17px;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    .section {
+      margin-bottom: 30px;
+      animation: fadeIn 1.5s ease forwards;
+    }
+
+    .start-button {
+      display: block;
+      margin: 40px auto 0;
+      padding: 14px 28px;
+      font-size: 18px;
+      background-color: #388e3c;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .start-button:hover {
+      background-color: #1b5e20;
+    }
+
+    strong {
+      color: #2e7d32;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Welcome to the EV Charging Simulation</h1>
+    <h2>
+        <strong>Instructions for the game</strong>
+    </h2>
+
+    <div class="section">
+      <p><strong>You are an EV driver navigating a charging task.</strong></p>
+      
+      <p><strong>Your goal is to keep your vehicle charged and visit all charging stations presented. This will make you eligible for Amazon gift card awards.</strong></p>
+      
+      <p><strong>You begin the simulation with 400 points.</strong></p>
+    </div>
+
+    <div class="section">
+      <h2>In each round:</h2>
+      <ul>
+        <li><strong>You will see three EV charging kiosks.</strong></li>
+        <li><strong>Some kiosks may be occupied.</strong></li>
+        <li><strong>You must select one kiosk to charge your vehicle.</strong></li>
+        <li><strong>Some kiosks may display discount coupons. These coupons may offer a discount on the points used for charging the vehicle.</strong></li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>Please note:</h2>
+      <ul>
+        <li><strong>Some kiosks may trigger a cyber attack, which could result in reduced vehicle charge or point loss.</strong></li>
+        <li><strong>If you notice any cyber attacks or experience unusual outcomes during charging, you can report the issue using the help button on the interface.</strong></li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <p><strong>The simulation will end if you run out of both vehicle charge and points.</strong></p>
+    </div>
+
+    <form action="/index" method="get">
+      <button type="submit" class="start-button">Start Simulation</button>
+    </form>
+  </div>
+
+  <script>
+    let socket;
+
+    if (sessionStorage.getItem('socket') === 'connected') {
+      socket = new WebSocket('ws://localhost:8080');
+
+      socket.onopen = () => console.log("WebSocket connection established.");
+
+      TobiiWeb_Client.start({
+        enable_state_machine_logs: true,
+        use_filter: "mean",
+        services: [
+          { name: "GazeTracking_Service", page_url: window.location.href }
+        ],
+        onMessage: {
+          "GazeTracking_Service": GazeCoordinatesReceiver({
+            filter: "mean",
+            filter_size: 5,
+            onGazeCoordinates: function (x, y) {
+              const timestamp = new Date().getTime();
+              const datetime = new Date().toISOString();
+              const data = { x_axis: x, y_axis: y, timestamp, datetimestamp: datetime };
+
+              if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify(data));
+              }
+            }
+          })
+        }
+      });
+    } else {
+      console.log("WebSocket not connected. Eye-tracking not started.");
+    }
+  </script>
+</body>
+</html>

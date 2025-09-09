@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaze Tracking</title>
+    <script type="text/javascript" src="js/TobiiWeb_Client.js"></script>
+</head>
+<body>
+    <button id="startButton" onclick="startTracking()">Start Tracking</button>
+    <button id="stopButton" onclick="stopTracking()" disabled>Stop Tracking and Save</button>
+    <script type="text/javascript" src="js/TobiiWeb_Client.js"></script>
+    <script>
+        let trackingInterval;
+        let eyeXClient;
+
+        function initializeTobii() {
+            // Initialize the Tobii EyeX client
+            eyeXClient = new TobiiEyeXClient();
+
+            eyeXClient.connect()
+                .then(() => {
+                    console.log('Tobii EyeX client connected.');
+                })
+                .catch((error) => {
+                    console.error('Error connecting to Tobii EyeX client:', error);
+                });
+        }
+
+        function getLocalTimestamp() {
+            return new Date().getTime(); // This will return the current time as a timestamp in milliseconds
+        }
+
+        function startTracking() {
+            document.getElementById('startButton').disabled = true;
+            document.getElementById('stopButton').disabled = false;
+
+            eyeXClient.startTracking((gazeData) => {
+                const coordinates = gazeData;
+                const timestamp = getLocalTimestamp();
+                const data = { x: coordinates.x, y: coordinates.y, timestamp: timestamp };
+
+                // Send the data to the server
+                fetch('/saveData', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+            });
+
+            trackingInterval = setInterval(() => {
+                // This is just a safety check in case tracking stops unexpectedly
+                if (!eyeXClient.isTracking()) {
+                    clearInterval(trackingInterval);
+                    document.getElementById('startButton').disabled = false;
+                    document.getElementById('stopButton').disabled = true;
+                }
+            }, 1000); // safety check every second
+        }
+
+        function stopTracking() {
+            eyeXClient.stopTracking();
+            clearInterval(trackingInterval);
+            document.getElementById('startButton').disabled = false;
+            document.getElementById('stopButton').disabled = true;
+        }
+
+        // Initialize Tobii EyeX client on page load
+        window.onload = initializeTobii;
+
+        // Example structure for the TobiiEyeXClient (simplified)
+        function TobiiEyeXClient() {
+            this.isConnected = false;
+            this.isTracking = false;
+            this.trackCallback = null;
+
+            this.connect = function() {
+                return new Promise((resolve, reject) => {
+                    // Add your actual connection logic here
+                    this.isConnected = true;
+                    resolve();
+                });
+            };
+
+            this.startTracking = function(callback) {
+                this.trackCallback = callback;
+                this.isTracking = true;
+
+                // Replace with your actual start tracking logic
+                // Example:
+                // this.gazePointDataStream = tobiiEyeX.gazePointDataStream();
+                // this.gazePointDataStream.addListener((gazeData) => {
+                //     this.trackCallback(gazeData);
+                // });
+
+                // Simulating real-time gaze data for demo purposes
+                this.simulationInterval = setInterval(() => {
+                    const gazeData = { x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight };
+                    this.trackCallback(gazeData);
+                }, 1000 / 60); // 60 Hz simulation
+            };
+
+            this.stopTracking = function() {
+                clearInterval(this.simulationInterval);
+                this.isTracking = false;
+            };
+        }
+    </script>
+</body>
+</html>

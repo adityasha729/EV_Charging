@@ -1,0 +1,17 @@
+starting_points,400
+initial_charge_min,20
+initial_charge_max,40
+cost_per_minute,1
+discount_percentage,0.1
+cyber_attack_loss_points,10
+charge_rate_per_minute,1
+deepfake_attack_probability,0.8
+real_attack_probability,0.2
+discount_coupon_chance,0.2
+cyber_attack_charge_reduction,0.5
+driving_decrement_min,5
+driving_decrement_max,15
+image_selection_threshold,0.5
+number_of_trials,20
+discount_coupon_percentage,0.1
+coupon_code_image_prob,0.8

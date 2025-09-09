@@ -1,0 +1,211 @@
+<!-- <html>
+    <title>sTobii EyeX</title>
+    <head>
+        <script type="text/javascript" src="./js/TobiiWeb_Client.js"></script>
+    </head>
+    <body style="margin:0px">
+        <button id="startButton" onclick="startTracking()">Start Tracking</button>
+        <button id="stopButton" onclick="stopTracking()" disabled>Stop Tracking and Save</button>
+        
+        <script>
+            let trackingData = [];
+
+            function startTracking(){
+                document.getElementById('startButton').disabled = true;
+                document.getElementById('stopButton').disabled = false;
+                TobiiWeb_Client.start({
+                    enable_state_machine_logs : true, 
+                    use_filter : "mean", 
+                    services : [
+                        {name : "GazeTracking_Service", page_url : window.location.href}
+                    ],
+                    onMessage : {
+                        "GazeTracking_Service" : GazeCoordinatesReceiver({
+                            filter: "mean",
+                            filter_size: 5,
+                            onGazeCoordinates: function(x,y){
+                                // console.log(x + " " + y);
+                                const timeStamp = new Date().getTime();
+                                const dateTimeStamp = new Date().toISOString();
+                                trackingData.push({ x_axis: x, y_axis: y, timestamp: timeStamp, datetimestamp : dateTimeStamp });
+                            }
+                        })
+                    }
+                });
+            }
+
+            function stopTracking() {
+                TobiiWeb_Client.stop()
+                document.getElementById('stopButton').disabled = true;
+                saveTrackingData();
+            }
+
+            function saveTrackingData() {
+                const trackingDataStr = trackingData.map(data => 
+                    `${data.timestamp}, ${data.datetimestamp}, ${data.x_axis}, ${data.y_axis}`
+                    ).join('\n');
+
+                const blob = new Blob([trackingDataStr], { type: 'text/plain' });
+
+                // link element
+                const a = document.createElement('a');
+                a.download = 'trackingData.txt';
+
+                // Create a URL for the blob and set it as the href attribute
+                a.href = window.URL.createObjectURL(blob);
+                
+                document.body.appendChild(a);                
+                a.click();
+                document.body.removeChild(a);
+        }
+        </script>
+    </body>
+</html>     -->
+
+
+
+
+
+<!-- ----------------------------------------------------------------------------------------------------------- --> -->
+
+<html>
+    <title>sTobii EyeX</title>
+    <head>
+        <script type="text/javascript" src="./js/TobiiWeb_Client.js"></script>
+    </head>
+    <body style="margin:0px">
+        <button id="startButton" onclick="startTracking()">Start Tracking</button>
+        <button id="stopButton" onclick="stopTracking()" disabled>Stop Tracking</button>
+        
+        <script>
+            let socket;
+            let trackingData = [];
+
+            function startTracking() {
+                document.getElementById('startButton').disabled = true;
+                document.getElementById('stopButton').disabled = false;
+
+                // Connect to the server via WebSocket
+                socket = new WebSocket('ws://localhost:8080');
+                socket.onopen = () => console.log('WebSocket connection established.');
+
+                TobiiWeb_Client.start({
+                    enable_state_machine_logs: true,
+                    use_filter: "mean",
+                    services: [
+                        { name: "GazeTracking_Service", page_url: window.location.href }
+                    ],
+                    onMessage: {
+                        "GazeTracking_Service": GazeCoordinatesReceiver({
+                            filter: "mean",
+                            filter_size: 5,
+                            onGazeCoordinates: function (x, y) {
+                                const timeStamp = new Date().getTime();
+                                const dateTimeStamp = new Date().toISOString();
+                                const data = { x_axis: x, y_axis: y, timestamp: timeStamp, datetimestamp: dateTimeStamp };
+                                trackingData.push(data);
+
+                                // Send data to the server in real-time
+                                if (socket && socket.readyState === WebSocket.OPEN) {
+                                    socket.send(JSON.stringify(data));
+                                }
+                            }
+                        })
+                    }
+                });
+            }
+
+            function stopTracking() {
+                TobiiWeb_Client.stop();
+                document.getElementById('stopButton').disabled = true;
+
+                if (socket) {
+                    socket.close();
+                    console.log('WebSocket connection closed.');
+                }
+            }
+        </script>
+    </body>
+</html>
+
+
+
+<!-- <html>
+    <title>sTobii EyeX</title>
+    <head>
+        <script type="text/javascript" src="./js/TobiiWeb_Client.js"></script>
+        <script>
+            // Initialize WebSocket
+            let socket;
+
+            // Initialize Worker
+            let worker;
+
+            function startTracking() {
+                document.getElementById('startButton').disabled = true;
+                document.getElementById('stopButton').disabled = false;
+
+                // Connect to the server via WebSocket
+                socket = new WebSocket('ws://localhost:8080');
+                socket.onopen = () => {
+                    console.log('WebSocket connection established.');
+                };
+
+                // Initialize Web Worker for real-time tracking
+                worker = new Worker('worker.js'); // Assuming worker.js is in the same directory
+                worker.onmessage = function(e) {
+                    if (e.data.type === 'track') {
+                        // Send gaze data to server in real-time
+                        if (socket && socket.readyState === WebSocket.OPEN) {
+                            socket.send(JSON.stringify(e.data.payload));
+                        }
+                    }
+                };
+
+                worker.postMessage({ type: 'start' });  // Start the worker
+
+                // Start Tobii Web Client
+                TobiiWeb_Client.start({
+                    enable_state_machine_logs: true,
+                    use_filter: "mean",
+                    services: [
+                        { name: "GazeTracking_Service", page_url: window.location.href }
+                    ],
+                    onMessage: {
+                        "GazeTracking_Service": GazeCoordinatesReceiver({
+                            filter: "mean",
+                            filter_size: 5,
+                            onGazeCoordinates: function (x, y) {
+                                const timeStamp = new Date().getTime();
+                                const dateTimeStamp = new Date().toISOString();
+
+                                const data = { x_axis: x, y_axis: y, timestamp: timeStamp, datetimestamp: dateTimeStamp };
+
+                                // Post data to Web Worker
+                                worker.postMessage({ type: 'track', payload: data });
+                            }
+                        })
+                    }
+                });
+            }
+
+            function stopTracking() {
+                TobiiWeb_Client.stop();
+                document.getElementById('stopButton').disabled = true;
+
+                if (socket) {
+                    socket.close();
+                    console.log('WebSocket connection closed.');
+                }
+
+                if (worker) {
+                    worker.postMessage({ type: 'stop' });  // Stop the worker
+                }
+            }
+        </script>
+    </head>
+    <body style="margin:0px">
+        <button id="startButton" onclick="startTracking()">Start Tracking</button>
+        <button id="stopButton" onclick="stopTracking()" disabled>Stop Tracking</button>
+    </body>
+</html> -->

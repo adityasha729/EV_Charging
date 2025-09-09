@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EV Charging Game Research - Demographics</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #a8e6cf 0%, #01c301 30%, #98f307 50%, #2cc601 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated background elements */
+        .bg-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 15s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            width: 80px;
+            height: 80px;
+            background: rgba(46, 125, 50, 0.3);
+            border-radius: 50%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            top: 20%;
+            right: 15%;
+            width: 120px;
+            height: 120px;
+            background: rgba(76, 175, 80, 0.3);
+            border-radius: 30%;
+            animation-delay: 5s;
+        }
+
+        .shape:nth-child(3) {
+            bottom: 20%;
+            left: 20%;
+            width: 100px;
+            height: 100px;
+            background: rgba(102, 187, 106, 0.3);
+            border-radius: 20px;
+            animation-delay: 10s;
+        }
+
+        .shape:nth-child(4) {
+            bottom: 30%;
+            right: 25%;
+            width: 60px;
+            height: 60px;
+            background: rgba(56, 142, 60, 0.3);
+            border-radius: 50%;
+            animation-delay: 7s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(5deg); }
+            50% { transform: translateY(-40px) rotate(-5deg); }
+            75% { transform: translateY(-20px) rotate(3deg); }
+        }
+
+        /* Main container */
+        .main-container {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.2);
+            padding: 50px 60px;
+            max-width: 700px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Header section */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            box-shadow: 0 8px 25px rgba(46, 125, 50, 0.3);
+        }
+
+        .main-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2e7d32;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #546e7a;
+            font-weight: 300;
+            line-height: 1.5;
+        }
+
+        /* Form styling */
+        .form {
+            display: grid;
+            gap: 30px;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2e7d32;
+            margin-bottom: 8px;
+            transition: color 0.3s ease;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 1.1rem;
+            border: 2px solid rgba(46, 125, 50, 0.2);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #4caf50;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-input:hover,
+        .form-select:hover {
+            border-color: rgba(46, 125, 50, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .form-select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23546e7a' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 16px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 50px;
+        }
+
+        .form-select option {
+            padding: 12px;
+            background: white;
+            color: #333;
+        }
+
+        /* Input validation styling */
+        .form-input:valid,
+        .form-select:valid {
+            border-color: rgba(76, 175, 80, 0.5);
+        }
+
+        .form-input:invalid:not(:placeholder-shown),
+        .form-select:invalid:not([value=""]) {
+            border-color: rgba(244, 67, 54, 0.5);
+        }
+
+        /* Submit button */
+        .submit-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .submit-button {
+            background: linear-gradient(135deg, #bcf904, #4caf50, #66bb6a);
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 18px 50px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(46, 125, 50, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(46, 125, 50, 0.4);
+        }
+
+        .submit-button:hover::before {
+            left: 100%;
+        }
+
+        .submit-button:active {
+            transform: translateY(-1px);
+        }
+
+        /* Progress indicator */
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(46, 125, 50, 0.1);
+            border-radius: 2px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2e7d32, #4caf50);
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 30px 25px;
+                margin: 10px;
+            }
+
+            .main-title {
+                font-size: 2rem;
+            }
+
+            .form-input,
+            .form-select {
+                padding: 14px 16px;
+                font-size: 1rem;
+            }
+
+            .submit-button {
+                padding: 16px 40px;
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Accessibility improvements */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Focus indicators */
+        .form-input:focus-visible,
+        .form-select:focus-visible,
+        .submit-button:focus-visible {
+            outline: 2px solid #4caf50;
+            outline-offset: 2px;
+        }
+    </style>
+    <script type="text/javascript" src="/static/js/TobiiWeb_Client.js"></script>
+</head>
+<body>
+    <div class="bg-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <div class="main-container">
+        <div class="form-container">
+            <div class="header">
+                <div class="header-icon">🌱</div>
+                <h1 class="main-title">Demographics Information</h1>
+                <p class="subtitle">Kindly enter the data accurately as per prompts given below.</p>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <form class="form" action="{{ url_for('handle_demographics') }}" method="post" id="demographicsForm">
+                <div class="form-group">
+                    <label for="age" class="form-label">Age</label>
+                    <input type="number" id="age" name="age" class="form-input" min="18" max="100" required placeholder="Enter your age">
+                </div>
+
+                <div class="form-group">
+                    <label for="gender" class="form-label">Gender</label>
+                    <select id="gender" name="gender" class="form-select" required>
+                        <option value="" disabled selected>Please select your gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="education" class="form-label">Level of Education</label>
+                    <select id="education" name="education" class="form-select" required>
+                        <option value="" disabled selected>Please select your Level of Education</option>
+                        <option value="Secondary">Secondary</option>
+                        <option value="Senior Secondary">Senior Secondary</option>
+                        <option value="Bachelor's">Bachelor's</option>
+                        <option value="Master's">Master's</option>
+                        <option value="Doctor of Philosophy">Doctor of Philosophy</option>
+                    </select>
+                </div>
+
+                <!-- <div class="form-group">
+                    <label for="education" class="form-label">Level of Education</label>
+                    <input type="text" id="education" name="education" class="form-input" required placeholder="e.g., Bachelor's Degree, Master's Degree, PhD">
+                </div> -->
+
+                <div class="form-group">
+                    <label for="specialization" class="form-label">Field of Specialization</label>
+                    <input type="text" id="specialization" name="specialization" class="form-input" required placeholder="e.g., Engineering, Business, Psychology">
+                </div>
+
+                <div class="form-group">
+                    <label for="ev_experience" class="form-label">Electric Vehicle Charging Experience</label>
+                    <select id="ev_experience" name="ev_experience" class="form-select" required>
+                        <option value="" disabled selected>How often have you used EV charging stations?</option>
+                        <option value="Never">Never - I have no experience with EV charging</option>
+                        <option value="Rarely">Rarely - Once or twice in my lifetime</option>
+                        <option value="Sometimes">Sometimes - A few times per year</option>
+                        <option value="Often">Often - Monthly or more frequently</option>
+                        <option value="Everyday">Daily - I regularly use EV charging stations</option>
+                    </select>
+                </div>
+
+                <div class="submit-container">
+                    <button type="submit" class="submit-button">
+                        Continue to Study
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Progress bar functionality
+        const form = document.getElementById('demographicsForm');
+        const progressFill = document.getElementById('progressFill');
+        const inputs = form.querySelectorAll('input[required], select[required]');
+        
+        function updateProgress() {
+            let filledInputs = 0;
+            inputs.forEach(input => {
+                if (input.type === 'number' && input.value && parseInt(input.value) >= 18) {
+                    filledInputs++;
+                } else if (input.type !== 'number' && input.value.trim() !== '') {
+                    filledInputs++;
+                }
+            });
+            
+            const progress = (filledInputs / inputs.length) * 100;
+            progressFill.style.width = progress + '%';
+        }
+
+        // Add event listeners for progress tracking
+        inputs.forEach(input => {
+            input.addEventListener('input', updateProgress);
+            input.addEventListener('change', updateProgress);
+        });
+
+        // Form validation enhancement
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            inputs.forEach(input => {
+                if (!input.value || (input.type === 'number' && parseInt(input.value) < 18)) {
+                    isValid = false;
+                    input.style.borderColor = 'rgba(244, 67, 54, 0.8)';
+                    input.focus();
+                } else {
+                    input.style.borderColor = 'rgba(76, 175, 80, 0.5)';
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+
+        // Enhanced input interactions
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.querySelector('.form-label').style.color = '#4caf50';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.querySelector('.form-label').style.color = '#2e7d32';
+            });
+        });
+
+        // Eye tracking integration
+        let socket;
+
+        // Check if the WebSocket connection exists in sessionStorage
+        if (sessionStorage.getItem('socket') === 'connected') {
+            socket = new WebSocket('ws://localhost:8080');
+            socket.onopen = () => console.log('WebSocket connection reused.');
+
+            // Continue Tobii EyeX tracking if WebSocket exists
+            TobiiWeb_Client.start({
+                enable_state_machine_logs: true,
+                use_filter: "mean",
+                services: [
+                    { name: "GazeTracking_Service", page_url: window.location.href }
+                ],
+                onMessage: {
+                    "GazeTracking_Service": GazeCoordinatesReceiver({
+                        filter: "mean",
+                        filter_size: 5,
+                        onGazeCoordinates: function (x, y) {
+                            const timeStamp = new Date().getTime();
+                            const dateTimeStamp = new Date().toISOString();
+                            const data = { x_axis: x, y_axis: y, timestamp: timeStamp, datetimestamp: dateTimeStamp };
+
+                            // Send gaze data to the server
+                            if (socket && socket.readyState === WebSocket.OPEN) {
+                                socket.send(JSON.stringify(data));
+                            }
+                        }
+                    })
+                }
+            });
+        } else {
+            console.log('No active WebSocket connection.');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EV Charging Study - Thank You</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0d4d2c 0%, #1a5c37 25%, #267d42 50%, #33a852 75%, #40c968 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            max-width: 700px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 60px 50px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(64,201,104,0.1)"/><circle cx="20" cy="20" r="1" fill="rgba(64,201,104,0.05)"/><circle cx="80" cy="30" r="1.5" fill="rgba(64,201,104,0.08)"/><circle cx="30" cy="80" r="1" fill="rgba(64,201,104,0.06)"/></svg>') repeat;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        .icon-container {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .main-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #40c968, #33a852);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 3rem;
+            color: white;
+            box-shadow: 0 15px 30px rgba(64, 201, 104, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 15px 30px rgba(64, 201, 104, 0.3);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 20px 40px rgba(64, 201, 104, 0.4);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 15px 30px rgba(64, 201, 104, 0.3);
+            }
+        }
+
+        .study-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #40c968, #1a5c37);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .main-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #1a5c37;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .message-section {
+            background: linear-gradient(135deg, #f0f9f3, #e8f5e8);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border-left: 5px solid #40c968;
+            text-align: left;
+        }
+
+        .message-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1a5c37;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .message-title:before {
+            content: '💚';
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+
+        .message-text {
+            color: #555;
+            line-height: 1.7;
+            font-size: 1rem;
+        }
+
+        .contact-section {
+            background: linear-gradient(135deg, #fff, #f8f9fa);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid #e0e0e0;
+            margin-top: 30px;
+        }
+
+        .contact-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1a5c37;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .contact-title:before {
+            content: '📞';
+            margin-right: 10px;
+            font-size: 1.3rem;
+        }
+
+        .contact-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #40c968;
+        }
+
+        .researcher-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1a5c37;
+            margin-bottom: 10px;
+        }
+
+        .institution-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #267d42;
+            margin-bottom: 15px;
+        }
+
+        .contact-details {
+            font-size: 0.95rem;
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .contact-details strong {
+            color: #1a5c37;
+        }
+
+        .contact-link {
+            color: #40c968;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .contact-link:hover {
+            color: #33a852;
+            text-decoration: underline;
+        }
+
+        .footer-note {
+            margin-top: 40px;
+            padding-top: 25px;
+            border-top: 1px solid #e0e0e0;
+            color: #666;
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+
+        .decorative-elements {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            opacity: 0.1;
+            font-size: 8rem;
+            color: #40c968;
+            z-index: -1;
+            transform: rotate(15deg);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 10px;
+            }
+            
+            .container {
+                padding: 40px 30px;
+            }
+            
+            .main-title {
+                font-size: 1.8rem;
+            }
+            
+            .main-icon {
+                width: 100px;
+                height: 100px;
+                font-size: 2.5rem;
+            }
+            
+            .message-section,
+            .contact-section {
+                padding: 20px;
+            }
+        }
+    </style>
+    <script type="text/javascript" src="/static/js/TobiiWeb_Client.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="decorative-elements">🔋</div>
+        
+        <div class="icon-container">
+            <div class="main-icon">🙏</div>
+            <div class="study-logo">🔋 EV SecureCharge</div>
+        </div>
+
+        <h1 class="main-title">Thank You for Your Consideration</h1>
+        <p class="subtitle">We respect your decision and appreciate the time you took to review our research study.</p>
+
+        <div class="message-section">
+            <div class="message-title">Your Privacy Matters</div>
+            <div class="message-text">
+                Since you have chosen not to participate in the EV charging security research study, no data has been collected and the study session has been terminated. Your decision is completely respected and there are no consequences for declining participation.
+            </div>
+        </div>
+
+        <div class="contact-section">
+            <div class="contact-title">Questions or Concerns?</div>
+            <div class="contact-card">
+                <div class="researcher-name">Prof. Varun Dutt, MS, PhD</div>
+                <div class="institution-name">Indian Institute of Technology Mandi</div>
+                <div class="contact-details">
+                    <strong>Address:</strong> VPO Kamand, District Mandi, HP, India - 175005<br>
+                    <strong>Email:</strong> <a href="mailto:varun@iitmandi.ac.in" class="contact-link">varun@iitmandi.ac.in</a><br>
+                    <strong>Phone:</strong> <a href="tel:+919190526715" class="contact-link">+91-1905-267150</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-note">
+            If you have any questions about this research study or would like more information about our cybersecurity research initiatives, please don't hesitate to reach out to our research team.
+        </div>
+    </div>
+
+    <script>
+        let socket;
+
+        // Check if the WebSocket connection exists in sessionStorage
+        if (sessionStorage.getItem('socket') === 'connected') {
+            socket = new WebSocket('ws://localhost:8080');
+            socket.onopen = () => console.log('WebSocket connection reused.');
+
+            // Continue Tobii EyeX tracking if WebSocket exists
+            TobiiWeb_Client.start({
+                enable_state_machine_logs: true,
+                use_filter: "mean",
+                services: [
+                    { name: "GazeTracking_Service", page_url: window.location.href }
+                ],
+                onMessage: {
+                    "GazeTracking_Service": GazeCoordinatesReceiver({
+                        filter: "mean",
+                        filter_size: 5,
+                        onGazeCoordinates: function (x, y) {
+                            const timeStamp = new Date().getTime();
+                            const dateTimeStamp = new Date().toISOString();
+                            const data = { x_axis: x, y_axis: y, timestamp: timeStamp, datetimestamp: dateTimeStamp };
+
+                            // Send gaze data to the server
+                            if (socket && socket.readyState === WebSocket.OPEN) {
+                                socket.send(JSON.stringify(data));
+                            }
+                        }
+                    })
+                }
+            });
+        } else {
+            console.log('No active WebSocket connection.');
+        }
+    </script>
+</body>
+</html>

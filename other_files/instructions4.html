@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EV Charging Simulation - Instructions</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"/>
+  <script type="text/javascript" src="/static/js/TobiiWeb_Client.js"></script>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #65f771, #a924f6);
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background: #ffffff;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 128, 0, 0.2);
+      animation: fadeIn 1.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      text-align: center;
+      color: #1b5e20;
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      color: #2e7d32;
+      font-size: 24px;
+      margin-bottom: 15px;
+      margin-top: 30px;
+    }
+
+    h3 {
+      color: #388e3c;
+      font-size: 20px;
+      margin-bottom: 10px;
+      margin-top: 25px;
+    }
+
+    p {
+      font-size: 17px;
+      line-height: 1.6;
+      color: #333;
+      margin-bottom: 15px;
+    }
+
+    ul {
+      padding-left: 20px;
+      margin-bottom: 20px;
+    }
+
+    li {
+      margin-bottom: 8px;
+      font-size: 17px;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    .section {
+      margin-bottom: 30px;
+      animation: fadeIn 1.5s ease forwards;
+    }
+
+    .rewards-section {
+      background: linear-gradient(135deg, #f8f9fa, #e3f2fd);
+      padding: 25px;
+      border-radius: 12px;
+      border-left: 5px solid #ffd700;
+      margin: 30px 0;
+      box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+    }
+
+    .rewards-section h2 {
+      color: #b8860b;
+      font-size: 26px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .prize-list {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 15px 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .prize-item {
+      display: flex;
+      align-items: center;
+      margin: 12px 0;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .prize-emoji {
+      font-size: 24px;
+      margin-right: 12px;
+    }
+
+    .compensation-highlight {
+      background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+      padding: 20px;
+      border-radius: 10px;
+      border: 2px solid #4caf50;
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .start-button {
+      display: block;
+      margin: 40px auto 0;
+      padding: 16px 32px;
+      font-size: 20px;
+      background: linear-gradient(135deg, #388e3c, #4caf50);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(56, 142, 60, 0.4);
+    }
+
+    .start-button:hover {
+      background: linear-gradient(135deg, #1b5e20, #2e7d32);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(56, 142, 60, 0.6);
+    }
+
+    strong {
+      color: #2e7d32;
+      font-weight: 700;
+    }
+
+    .highlight-text {
+      color: #d32f2f;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Welcome to the EV Charging Simulation</h1>
+    
+    <h2>
+        <strong>Instructions for the game</strong>
+    </h2>
+
+    <div class="section">
+      <p><strong>You are an EV driver navigating a charging task.</strong></p>
+      
+      <p><strong>Your goal is to keep your vehicle charged and visit all charging stations presented. <span class="highlight-text">Complete this successfully to become eligible for the lucky draw!</span></strong></p>
+      
+      <p><strong>You begin the simulation with 400 points.</strong></p>
+      <p><strong>1 point = 1% Charge.</strong></p>
+    </div>
+
+    <div class="section">
+      <h2>In each round:</h2>
+      <ul>
+        <li><strong>You will see three EV charging kiosks.</strong></li>
+        <li><strong>Some kiosks may be occupied.</strong></li>
+        <li><strong>You must select one kiosk to charge your vehicle.</strong></li>
+        <li><strong>You may also skip charging if you don't want to charge at a particular station using SKIP CHARGING button.</strong></li>
+        <li><strong>Some kiosks may display discount coupons. These coupons may offer a discount on the points used for charging the vehicle.</strong></li>
+      </ul>
+    </div>
+
+      <div class="rewards-section">
+      <h2>🏆 Exciting Rewards Await! 🏆</h2>
+      
+      <div class="compensation-highlight">
+        <p><strong>Guaranteed Compensation: Every participant receives ₹30 as appreciation for your valuable time!</strong></p>
+      </div>
+      
+      <p><strong>PLUS - Lucky Draw for Top Performers!</strong></p>
+      <p>Top 10 scorers who visit all charging stations will be eligible for our exclusive lucky draw with amazing prizes:</p>
+            <p style="text-align: center; margin-top: 15px;"><em>3 lucky winners will be randomly selected from the top performers!</em></p>
+
+      <div class="prize-list">
+        <div class="prize-item">
+          <span class="prize-emoji">🥇</span>
+          <span><strong>1st Place</strong>: ₹1000 Amazon Gift Card</span>
+        </div>
+        <div class="prize-item">
+          <span class="prize-emoji">🥈</span>
+          <span><strong>2nd Place</strong>: ₹500 Amazon Gift Card</span>
+        </div>
+        <div class="prize-item">
+          <span class="prize-emoji">🥉</span>
+          <span><strong>3rd Place</strong>: ₹100 Amazon Gift Card</span>
+        </div>
+      </div>
+      </div>
+
+
+    <div class="section">
+      <h2>Please note:</h2>
+      <ul>
+        <li><strong>If your vehicle has very low charge then you will be redirected to the same station.</strong></li>
+        <li><strong>Some kiosks may trigger a cyber attack, which could result in reduced vehicle charge or point loss.</strong></li>
+        <li><strong>If you notice any cyber attacks or experience unusual outcomes during charging, you can report the issue using the help button on the interface.</strong></li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <p><strong>The simulation will end if you run out of both vehicle charge and points.</strong></p>
+      <p><strong style="color: #ff6b35;">Remember: Visit ALL charging stations to qualify for the amazing prize draw!</strong></p>
+    </div>
+
+    <form action="/index" method="get">
+      <button type="submit" class="start-button">🚀 Start Your Journey!</button>
+    </form>
+  </div>
+
+  <script>
+    let socket;
+
+    if (sessionStorage.getItem('socket') === 'connected') {
+      socket = new WebSocket('ws://localhost:8080');
+
+      socket.onopen = () => console.log("WebSocket connection established.");
+
+      TobiiWeb_Client.start({
+        enable_state_machine_logs: true,
+        use_filter: "mean",
+        services: [
+          { name: "GazeTracking_Service", page_url: window.location.href }
+        ],
+        onMessage: {
+          "GazeTracking_Service": GazeCoordinatesReceiver({
+            filter: "mean",
+            filter_size: 5,
+            onGazeCoordinates: function (x, y) {
+              const timestamp = new Date().getTime();
+              const datetime = new Date().toISOString();
+              const data = { x_axis: x, y_axis: y, timestamp, datetimestamp: datetime };
+
+              if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify(data));
+              }
+            }
+          })
+        }
+      });
+    } else {
+      console.log("WebSocket not connected. Eye-tracking not started.");
+    }
+  </script>
+</body>
+</html>

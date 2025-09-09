@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Low Charge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2d5016 0%, #4a7c59 25%, #5fb3d4 50%, #2d5016 75%, #1a3409 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease-in-out infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .background-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(34, 139, 34, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(50, 205, 50, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(0, 128, 0, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .floating-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(144, 238, 144, 0.6);
+            border-radius: 50%;
+            animation: float 6s infinite ease-in-out;
+        }
+        
+        .particle:nth-child(1) { left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { left: 20%; animation-delay: 1s; }
+        .particle:nth-child(3) { left: 30%; animation-delay: 2s; }
+        .particle:nth-child(4) { left: 40%; animation-delay: 3s; }
+        .particle:nth-child(5) { left: 50%; animation-delay: 4s; }
+        .particle:nth-child(6) { left: 60%; animation-delay: 5s; }
+        .particle:nth-child(7) { left: 70%; animation-delay: 0.5s; }
+        .particle:nth-child(8) { left: 80%; animation-delay: 1.5s; }
+        .particle:nth-child(9) { left: 90%; animation-delay: 2.5s; }
+        
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+                transform: translateY(90vh) scale(1);
+            }
+            90% {
+                opacity: 1;
+                transform: translateY(10vh) scale(1);
+            }
+        }
+        
+        .container {
+            text-align: center;
+            z-index: 10;
+            position: relative;
+            max-width: 800px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 
+                0 32px 64px rgba(0, 0, 0, 0.3),
+                0 16px 32px rgba(34, 139, 34, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(144, 238, 144, 0.3);
+            animation: containerPulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes containerPulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 
+                    0 32px 64px rgba(0, 0, 0, 0.3),
+                    0 16px 32px rgba(34, 139, 34, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            }
+            50% { 
+                transform: scale(1.02);
+                box-shadow: 
+                    0 36px 72px rgba(0, 0, 0, 0.35),
+                    0 18px 36px rgba(34, 139, 34, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            }
+        }
+        
+        .battery-icon {
+            width: 120px;
+            height: 60px;
+            margin: 0 auto 30px;
+            position: relative;
+            background: linear-gradient(145deg, #ff6b6b, #ee5a52);
+            border-radius: 8px;
+            box-shadow: 
+                0 8px 16px rgba(255, 107, 107, 0.3),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .battery-icon::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 20px;
+            background: linear-gradient(145deg, #ff6b6b, #ee5a52);
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .battery-level {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            right: 6px;
+            bottom: 6px;
+            background: linear-gradient(90deg, #ff4757, #ff3838);
+            border-radius: 4px;
+            width: 15%;
+            animation: batteryBlink 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes batteryBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            color: #2d5016;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            line-height: 1.2;
+            animation: titleGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes titleGlow {
+            from { 
+                color: #2d5016;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            to { 
+                color: #1a3409;
+                text-shadow: 2px 2px 8px rgba(45, 80, 22, 0.3);
+            }
+        }
+        
+        .subtitle {
+            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+            color: #4a7c59;
+            margin-bottom: 40px;
+            font-weight: 400;
+            line-height: 1.4;
+        }
+        
+        .charge-info {
+            background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
+            border: 2px solid #90EE90;
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 8px 24px rgba(144, 238, 144, 0.2);
+        }
+        
+        .charge-text {
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            color: #2d5016;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+        
+        .urgent-notice {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 2px solid #ffc107;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #856404;
+            font-weight: 600;
+            font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(144, 238, 144, 0.3);
+            border-radius: 4px;
+            margin: 30px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #32CD32, #228B22);
+            border-radius: 4px;
+            width: 0%;
+            animation: progressFill 5s ease-out forwards;
+        }
+        
+        @keyframes progressFill {
+            to { width: 100%; }
+        }
+        
+        .redirect-text {
+            font-size: clamp(0.8rem, 1.5vw, 1rem);
+            color: #4a7c59;
+            font-style: italic;
+            margin-top: 20px;
+        }
+        
+        .eco-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #32CD32, #228B22);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: clamp(0.7rem, 1.4vw, 0.9rem);
+            font-weight: 600;
+            margin-top: 15px;
+            box-shadow: 0 4px 12px rgba(50, 205, 50, 0.3);
+        }
+        
+        @media (max-height: 600px) {
+            .container { padding: 20px; }
+            .battery-icon { width: 80px; height: 40px; margin-bottom: 20px; }
+            .charge-info { padding: 20px; margin: 20px 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-overlay"></div>
+    <div class="floating-particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
+    <div class="container">
+        <div class="battery-icon">
+            <div class="battery-level"></div>
+        </div>
+        
+        <h1>Vehicle Charge Depleted</h1>
+        <p class="subtitle">Immediate charging required to continue your journey</p>
+        
+        <div class="charge-info">
+            <div class="charge-text">🔋 Battery Level: Critical (< 5%)</div>
+            <div class="charge-text">⚡ Charging Required: Yes</div>
+            <div class="charge-text">🚗 Vehicle Status: Stationary</div>
+        </div>
+        
+        <div class="urgent-notice">
+            ⚠️ You don't have enough charging in your vehicle.
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar"></div>
+        </div>
+        
+        <div class="redirect-text">
+            Redirecting to previous charging station in 5 seconds...
+        </div>
+        
+        <div class="eco-badge">
+            🌱 ECO-FRIENDLY TRANSPORT
+        </div>
+    </div>
+
+    <script>
+        // Eye tracking code placeholder - maintain original functionality
+        setTimeout(function() {
+            window.location.href = "/index";
+        }, 5000);
+        
+        // Additional visual enhancements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add subtle mouse interaction for eye tracking studies
+            document.addEventListener('mousemove', function(e) {
+                const container = document.querySelector('.container');
+                const rect = container.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                
+                const rotateX = (y / rect.height) * 2;
+                const rotateY = (x / rect.width) * -2;
+                
+                container.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(${1 + Math.abs(x + y) / 10000})`;
+            });
+            
+            document.addEventListener('mouseleave', function() {
+                const container = document.querySelector('.container');
+                container.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

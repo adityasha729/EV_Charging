@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EV Research Study - Consent Form</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #8afc17 0%, #b156f7 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(1deg); }
+            66% { transform: translateY(10px) rotate(-1deg); }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.1),
+                0 0 0 1px rgba(255, 255, 255, 0.05);
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }
+
+        .container::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #27e83d, #c3fe4e);
+            border-radius: 4px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #2ef172 0%, #265acb 100%);
+            border-radius: 16px;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .logo::before {
+            content: '⚡';
+            font-size: 28px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #13b601, #09f6ab);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .content {
+            line-height: 1.7;
+            color: #333;
+        }
+
+        .content p {
+            font-size: 15px;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        .content p:nth-child(1) { animation-delay: 0.1s; }
+        .content p:nth-child(2) { animation-delay: 0.2s; }
+        .content p:nth-child(3) { animation-delay: 0.3s; }
+        .content p:nth-child(4) { animation-delay: 0.4s; }
+        .content p:nth-child(5) { animation-delay: 0.5s; }
+        .content p:nth-child(6) { animation-delay: 0.6s; }
+        .content p:nth-child(7) { animation-delay: 0.7s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+        }
+
+        strong {
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        ul {
+            margin: 16px 0;
+            padding-left: 24px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        li::marker {
+            color: #667eea;
+        }
+
+        a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: #764ba2;
+        }
+
+        .form-container {
+            margin-top: 32px;
+            padding-top: 32px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            min-width: 140px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-agree {
+            background: linear-gradient(135deg, #31f423 0%, #b0f308 100%);
+            color: white;
+            box-shadow: 0 8px 32px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn-agree:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn-agree:active {
+            transform: translateY(0);
+        }
+
+        .btn-decline {
+            background: rgba(255, 255, 255, 0.9);
+            color: #666;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-decline:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(0, 0, 0, 0.2);
+            transform: translateY(-1px);
+            color: #333;
+        }
+
+        .btn-decline:active {
+            transform: translateY(0);
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .info-card {
+            background: rgba(44, 237, 57, 0.1);
+            padding: 16px;
+            border-radius: 12px;
+            border-left: 4px solid #05f021;
+        }
+
+        .info-card strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #00bd09;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 24px;
+                margin: 10px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(103, 126, 234, 0.3);
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    <script type="text/javascript" src="/static/js/TobiiWeb_Client.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo"></div>
+            <h1>Research Consent Form</h1>
+            <p class="subtitle">EV Charging Security & Usability Study</p>
+        </div>
+
+        <div class="content">
+            <p>
+                You are invited to participate in a research study conducted by <strong>Prof. Varun Dutt, MS, PhD</strong>, at the Indian Institute of Technology Mandi. The purpose of this study is to understand user decision-making and enhance the security and usability of electric vehicle (EV) charging station interfaces.
+            </p>
+
+            <div class="info-card">
+                <strong>Study Purpose</strong>
+                Participants will be presented with simulated EV charging scenarios and their responses will be analyzed to develop better security measures for EV charging infrastructure.
+            </div>
+
+            <p>
+                <strong>Procedures:</strong> If you agree to participate in this study, you will be asked to:
+            </p>
+            <ul>
+                <li>Complete a demographic questionnaire</li>
+                <li>Engage in a series of simulated scenarios involving EV charging stations</li>
+                <li>Provide feedback on your experience</li>
+            </ul>
+            <p>The study will take approximately <strong>20-35 minutes</strong> to complete.</p>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <strong>Risks & Discomforts</strong>
+                    There are no foreseeable risks or discomforts associated with participation in this study.
+                </div>
+                <div class="info-card">
+                    <strong>Benefits</strong>
+                    Your participation will contribute to the development of more secure and user-friendly EV charging station interfaces.
+                </div>
+            </div>
+
+            <p>
+                <strong>Confidentiality:</strong> Your participation in this study is confidential. All data collected will be anonymized and securely stored. Only the research team will have access to the data. No personal information will be disclosed in any reports or publications resulting from this study.
+            </p>
+
+            <p>
+                <strong>Contact Information:</strong> If you have any questions or concerns about this study, please contact Prof. Varun Dutt at:
+            </p>
+            <ul>
+                <li>Email: <a href="mailto:varun@iitmandi.ac.in">varun@iitmandi.ac.in</a></li>
+                <li>Phone: +91-1905-267150</li>
+                <li>Address: Indian Institute of Technology Mandi, VPO Kamand, District Mandi, HP, India - 175005</li>
+            </ul>
+
+            <p>
+                <strong>Voluntary Participation:</strong> Your participation in this study is voluntary. You may choose not to participate or withdraw from the study at any time without any penalty or loss of benefits to which you are otherwise entitled.
+            </p>
+        </div>
+
+        <div class="form-container">
+            <form action="{{ url_for('handle_consent') }}" method="post" id="consentForm">
+                <div class="button-group">
+                    <button type="submit" name="consent" value="agree" class="btn-agree" onclick="startTracking()">
+                        I Agree to Participate
+                    </button>
+                    <button type="submit" name="consent" value="decline" class="btn-decline" onclick="stopTracking()">
+                        I Decline
+                    </button>
+                </div>
+            </form>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processing your response...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let socket;
+
+        function showLoading() {
+            document.querySelector('.button-group').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        function startTracking() {
+            showLoading();
+            // Check if a WebSocket connection already exists in sessionStorage
+            if (!sessionStorage.getItem('socket')) {
+                socket = new WebSocket('ws://localhost:8080');
+                socket.onopen = () => console.log('WebSocket connection established.');
+                sessionStorage.setItem('socket', 'connected'); // Store flag
+            } else {
+                console.log('WebSocket connection already active.');
+            }
+
+            // Start Tobii EyeX tracking
+            TobiiWeb_Client.start({
+                enable_state_machine_logs: true,
+                use_filter: "mean",
+                services: [
+                    { name: "GazeTracking_Service", page_url: window.location.href }
+                ],
+                onMessage: {
+                    "GazeTracking_Service": GazeCoordinatesReceiver({
+                        filter: "mean",
+                        filter_size: 5,
+                        onGazeCoordinates: function (x, y) {
+                            const timeStamp = new Date().getTime();
+                            const dateTimeStamp = new Date().toISOString();
+                            const data = { x_axis: x, y_axis: y, timestamp: timeStamp, datetimestamp: dateTimeStamp };
+
+                            // Send gaze data to the server
+                            if (socket && socket.readyState === WebSocket.OPEN) {
+                                socket.send(JSON.stringify(data));
+                            }
+                        }
+                    })
+                }
+            });
+        }
+
+        function stopTracking() {
+            showLoading();
+            if (socket) {
+                socket.close();
+                console.log('WebSocket connection closed.');
+            }
+            TobiiWeb_Client.stop();
+            sessionStorage.removeItem('socket'); // Remove flag
+        }
+
+        // Add entrance animations to list items
+        document.addEventListener('DOMContentLoaded', function() {
+            const listItems = document.querySelectorAll('li');
+            listItems.forEach((item, index) => {
+                item.style.animationDelay = `${0.8 + index * 0.1}s`;
+                item.style.animation = 'fadeInUp 0.6s ease-out forwards';
+                item.style.opacity = '0';
+            });
+        });
+    </script>
+</body>
+</html>
