@@ -835,7 +835,7 @@ def send_message():
             "You are a Help Agent for EV charging kiosks. Based on the safety color (green, yellow, red) and cyber attack risk, recommend the safest available kiosk for the user to use. "
             f"Green means low risk (≤ {green}), yellow is medium risk ({green} < ratio ≤ {yellow}), red is high risk (> {yellow}). "
             "Never recommend a kiosk that is occupied or unavailable. If all kiosks are risky, suggest the least risky available one. "
-            "Be brief (max 100 words), clear, and do not mention numbers or ratios. Only mention the kiosk(s) and a short reason. "
+            "Be brief, clear, and do not mention numbers or ratios. Only mention the kiosk(s) and a short reason why the should or should not be chosen. "
             "Here is the current kiosk data:\n"
             f"{kiosk_info}"
             "Can you recommend the safest kiosk to use?"
