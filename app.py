@@ -1,12 +1,20 @@
 from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory, jsonify, flash
 import requests
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
+from dotenv import load_dotenv
 import random
 import csv
 import os
 from datetime import datetime, timezone
 
+
 # ==================== CONFIGURATION PARAMETERS ====================
 # All configurable parameters are centralized here for easy modification
+
+class KioskThresholds:
+    GREEN = 0.3  # ≤ this is green
+    YELLOW = 0.7  # > green and ≤ this is yellow, > this is red
 
 class GameConfig:
     """Configuration class containing all game parameters"""
@@ -50,14 +58,23 @@ class GameConfig:
 
 # ==================== FLASK APP INITIALIZATION ====================
 
+
+load_dotenv()
 app = Flask(__name__)
 app.secret_key = 'a_very_secret_random_string_1234567890!@#$%^&*()'
 
 # Chatbot configuration
+
+# Load model and API keys from environment variables
+import os
 chatbots = {
+    "gemini": {
+        "api_key": os.environ.get("GEMINI_API_KEY", ""),
+        "model": os.environ.get("GEMINI_MODEL", "")
+    },
     "openai": {
-        "api_key": "sk-1234567890abcdef1234567890abcdef12345678",
-        "endpoint": "https://api.openai.com/v1/chat/completions"  # <-- This is correct for OpenAI GPT-3.5/4
+        "api_key": os.environ.get("OPENAI_API_KEY", ""),
+        "model": os.environ.get("OPENAI_MODEL", "")
     }
 }
 
@@ -752,18 +769,21 @@ def kiosk_status():
                         if attack.lower() == 'cyber attack':
                             attack_counts[k] += 1
         status = {}
+        ratios = {}
         for k in [1, 2, 3]:
             if total_counts[k] == 0:
                 status[k] = 'green'
+                ratios[k] = 0.0
             else:
                 ratio = attack_counts[k] / total_counts[k]
-                if ratio > 0.5:
+                ratios[k] = ratio
+                if ratio > KioskThresholds.YELLOW:
                     status[k] = 'red'
-                elif ratio > 0.2:
+                elif ratio > KioskThresholds.GREEN:
                     status[k] = 'yellow'
                 else:
                     status[k] = 'green'
-        return jsonify(status)
+        return jsonify({"status": status, "ratios": ratios})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -774,62 +794,86 @@ def chatbot():
     send_eeg_marker('chatbot_page_0')
     send_eye_marker('chatbot_page_0')
     log_user_interaction('chatbot_page', 0)
-    return render_template('chatbot.html', bots=list(chatbots.keys()))
+    # Gemini is default, so put it first in the list
+    bots = list(chatbots.keys())
+    if 'gemini' in bots:
+        bots.remove('gemini')
+        bots = ['gemini'] + bots
+    return render_template('chatbot.html', bots=bots, default_bot='gemini')
 
 @app.route('/send_message', methods=['POST'])
 def send_message():
     """Handle sending message to the selected chatbot"""
-    bot_name = request.json.get("bot")
+    bot_name = request.json.get("bot") or "gemini"
     message = request.json.get("message")
 
     if bot_name not in chatbots:
         return jsonify({"error": "Bot not configured."}), 400
 
-    # Check for kiosk safety query
-    if "kiosk" in message.lower() and ("safe" in message.lower() or "cyber attack" in message.lower()):
-        # Get kiosk status from csv
-        try:
-            resp = kiosk_status()
-            if hasattr(resp, 'json'):
-                status = resp.json
-            else:
-                status = resp.get_json()
-            reply = "Kiosk safety status:\n"
-            for k in [1, 2, 3]:
-                color = status.get(str(k), status.get(k, 'unknown'))
-                emoji = {"red": "🔴", "yellow": "🟡", "green": "🟢"}.get(color, "❓")
-                reply += f"Kiosk {k}: {emoji} ({color})\n"
-            return jsonify({"reply": reply})
-        except Exception as e:
-            return jsonify({"reply": f"Could not analyze kiosk safety: {e}"})
-
-    # ...existing code for OpenAI API...
-    bot = chatbots[bot_name]
-    headers = {
-        "Authorization": f"Bearer {bot['api_key']}",
-        "Content-Type": "application/json"
-    }
-    model_name = "gpt-3.5-turbo" if bot_name == "openai" else "gpt-4"
-    data = {
-        "model": model_name,
-        "messages": [{"role": "user", "content": message}]
-    }
     try:
-        response = requests.post(bot["endpoint"], headers=headers, json=data)
-        response.raise_for_status()
-        reply = response.json()
-        answer = reply.get("choices", [{}])[0].get("message", {}).get("content", "No response.")
-        return jsonify({"reply": answer})
-    except requests.exceptions.HTTPError as e:
-        try:
-            error_msg = response.json().get("error", {}).get("message", str(e))
-        except Exception:
-            error_msg = str(e)
-        return jsonify({"error": error_msg}), response.status_code
-    except requests.exceptions.RequestException as e:
-        return jsonify({"error": str(e)}), 500
+        resp = kiosk_status()
+        if hasattr(resp, 'json'):
+            data = resp.json
+        else:
+            data = resp.get_json()
+        status = data.get("status", {})
+        ratios = data.get("ratios", {})
+        # If user message is 'checknow', return raw data as a string in the same format as LLM reply
+        if isinstance(message, str) and message.strip().lower() == 'checknow':
+            raw_data = f"Kiosk status: {status}, Cyber Attack Ratios: {ratios}"
+            return jsonify({"reply": raw_data})
 
-# ...existing code...
+        print(ratios)
+        # Compose a detailed prompt for the LLM
+        kiosk_info = "\n".join([
+            f"Kiosk {k}: Status = {status.get(str(k), status.get(k, 'unknown'))}, Cyber Attack Ratio = {ratios.get(str(k), 0.0):.2f}"
+            for k in [1, 2, 3]
+        ])
+        green = KioskThresholds.GREEN
+        yellow = KioskThresholds.YELLOW
+        system_prompt = (
+            "You are a Help Agent for EV charging kiosks. Based on the safety color (green, yellow, red) and cyber attack risk, recommend the safest available kiosk for the user to use. "
+            f"Green means low risk (≤ {green}), yellow is medium risk ({green} < ratio ≤ {yellow}), red is high risk (> {yellow}). "
+            "Never recommend a kiosk that is occupied or unavailable. If all kiosks are risky, suggest the least risky available one. "
+            "Be brief (max 100 words), clear, and do not mention numbers or ratios. Only mention the kiosk(s) and a short reason. "
+            "Here is the current kiosk data:\n"
+            f"{kiosk_info}"
+            "Can you recommend the safest kiosk to use?"
+        )
+        # The user's original question is appended for context
+        full_prompt = system_prompt + "\n\nUser question: " + message
+        # Use LLM to answer
+        if bot_name == "gemini":
+            llm = ChatGoogleGenerativeAI(
+                google_api_key=chatbots["gemini"]["api_key"],
+                model=chatbots["gemini"]["model"]
+            )
+            try:
+                print(full_prompt)
+        
+                answer = llm.invoke(full_prompt)
+                reply_text = getattr(answer, 'content', str(answer))
+                return jsonify({"reply": reply_text})
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
+        elif bot_name == "openai":
+            llm = ChatOpenAI(
+                openai_api_key=chatbots["openai"]["api_key"],
+                model=chatbots["openai"]["model"]
+            )
+            try:
+               
+                answer = llm.invoke(full_prompt)
+                reply_text = getattr(answer, 'content', str(answer))
+                return jsonify({"reply": reply_text})
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
+        else:
+            return jsonify({"error": "Bot not configured."}), 400
+    except Exception as e:
+        return jsonify({"reply": f"Could not analyze kiosk safety: {e}"})
+
+
 @app.route('/help_click', methods=['POST'])
 def help_click():
     """Handle help button clicks"""

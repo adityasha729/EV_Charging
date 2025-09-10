@@ -401,3 +401,13 @@ StationID,Kiosk1_SelectedImage,Kiosk1_SelectedAttack,Kiosk1_MobileUPI,Kiosk1_Cha
 2,deepfake1.png,Cyber Attack,,15,0,30,10,52,67,real6.png,Cyber Attack,,10,0,20,10,46,56,real4.png,Safe,,20,0,20,0,30,50
 7,real6.png,Safe,,,0,,,,,real4.png,Safe,7687689687,10,0,10.0,0,12.0,22.0,deepfake2.png,Cyber Attack,,,0,,,,
 9,deepfake5.png,Cyber Attack,7687689687,7,0,15.0,10.0,0,7.0,deepfake4.png,Cyber Attack,,,0,,,,,deepfake2.png,Cyber Attack,,,0,,,,
+1,deepfake1.png,Cyber Attack,123,2,0,5.0,10.0,33,35.0,deepfake1.png,Safe,,,0,,,,,None,None,,,0,,,,
+2,deepfake2.png,Cyber Attack,,,0,,,,,real6.png,Safe,6,60,0,60.0,0,30.0,90.0,deepfake3.png,Safe,,,0,,,,
+1,deepfake5.png,Cyber Attack,,,0,,,,,deepfake4.png,Safe,,,0,,,,,real4.png,Safe,12,4,0,4.0,0,31,35.0
+2,real6.png,Cyber Attack,,,0,,,,,None,None,,,0,,,,,deepfake2.png,Cyber Attack,12,3,0,6.0,10.0,27.0,30.0
+3,real4.png,Safe,,,0,,,,,deepfake2.png,Cyber Attack,,,0,,,,,real4.png,Safe,12,5,0,5.0,0,15.0,20.0
+4,real4.png,Safe,1,9,0,9.0,0,13.0,22.0,real6.png,Safe,,,0,,,,,None,None,,,0,,,,
+5,deepfake3.png,Cyber Attack,,,0,,,,,deepfake2.png,Safe,,,0,,,,,real4.png,Safe,12,8,0,8.0,0,8.0,16.0
+6,real6.png,Safe,,,0,,,,,real4.png,Cyber Attack,,,0,,,,,deepfake1.png,Cyber Attack,123,5,0,10.0,10.0,4.0,9.0
+7,deepfake1.png,Cyber Attack,,,0,,,,,deepfake2.png,Cyber Attack,,,0,,,,,deepfake3.png,Cyber Attack,12,10,0,20.0,10.0,1.0,11.0
+7,real4.png,Safe,112,20,0,20.0,0,0,20.0,None,None,,,0,,,,,real6.png,Safe,,,0,,,,
