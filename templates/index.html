@@ -430,57 +430,115 @@
             font-weight: 600;
         }
                 .chatbot-btn {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-            margin-top: 10px;
-            font-size: 16px;
-        }
-
-        .chatbot-btn:hover {
-            background-color: #45a049;
-        }
-
-        /* Chatbot modal styles */
-        #chatbot-modal {
-            display: none;
-            position: fixed;
-            z-index: 9999;
-            right: 40px;
-            bottom: 40px;
-            width: 420px;
-            height: 600px;
-            background: #fff;
-            border-radius: 18px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.25);
-            border: 2px solid #4CAF50;
-            overflow: hidden;
-        }
-
-        #chatbot-modal iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            border-radius: 18px;
-        }
-
-        #chatbot-modal .close-btn {
-            position: absolute;
-            top: 8px;
-            right: 12px;
-            background: #F44336;
-            color: #fff;
-            border: none;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            font-size: 20px;
-            cursor: pointer;
-            z-index: 10;
-        }
+                    background: linear-gradient(135deg, #4CAF50, #45A049);
+                    color: white;
+                    padding: 12px 24px;
+                    border: none;
+                    border-radius: 10px;
+                    font-size: 16px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    margin-top: 10px;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
+                }
+                .chatbot-btn:hover {
+                    background: linear-gradient(270deg, #00ff08, #b5f701);
+                    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.2);
+                }
+                .chatbot-panel {
+                    display: none;
+                    margin-top: 18px;
+                    background: rgba(255,255,255,0.97);
+                    border-radius: 18px;
+                    box-shadow: 0 4px 24px rgba(76,175,80,0.10);
+                    border: 2px solid #4CAF50;
+                    padding: 20px 18px 16px 18px;
+                    max-width: 100%;
+                    min-height: 220px;
+                    flex-direction: column;
+                    gap: 10px;
+                    animation: chatbotSlideIn 0.3s;
+                }
+                @keyframes chatbotSlideIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .chatbot-title {
+                    font-size: 18px;
+                    font-weight: 700;
+                    color: #2E7D32;
+                    margin-bottom: 8px;
+                    text-align: left;
+                }
+                .chatbot-chatbox {
+                    height: 180px;
+                    overflow-y: auto;
+                    background: #f5f5f5;
+                    border-radius: 10px;
+                    border: 1.5px solid #E0E0E0;
+                    padding: 10px;
+                    margin-bottom: 10px;
+                    font-size: 15px;
+                }
+                .chatbot-message {
+                    margin: 6px 0;
+                    line-height: 1.5;
+                }
+                .chatbot-message.user {
+                    color: #1976D2;
+                    font-weight: 500;
+                }
+                .chatbot-message.bot {
+                    color: #4CAF50;
+                    font-weight: 500;
+                }
+                .chatbot-input-row {
+                    display: flex;
+                    gap: 8px;
+                }
+                .chatbot-input {
+                    flex: 1;
+                    padding: 10px 12px;
+                    border-radius: 8px;
+                    border: 1.5px solid #E0E0E0;
+                    font-size: 15px;
+                    transition: border-color 0.3s;
+                }
+                .chatbot-input:focus {
+                    outline: none;
+                    border-color: #4CAF50;
+                    box-shadow: 0 0 0 2px rgba(76,175,80,0.08);
+                }
+                .chatbot-send-btn {
+                    background: linear-gradient(135deg, #4CAF50, #45A049);
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    padding: 10px 18px;
+                    font-size: 15px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+                .chatbot-send-btn:hover {
+                    background: linear-gradient(270deg, #00ff08, #b5f701);
+                }
+                .chatbot-clear-btn {
+                    background: #F44336;
+                    color: #fff;
+                    border: none;
+                    border-radius: 8px;
+                    padding: 10px 14px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    margin-left: 6px;
+                    transition: background 0.2s;
+                }
+                .chatbot-clear-btn:hover {
+                    background: #d32f2f;
+                }
     </style>
     <script type="text/javascript" src="/static/js/TobiiWeb_Client.js"></script>
 </head>
@@ -502,7 +560,7 @@
     <div class="main-container">
         <div class="stations-section">
             {% for station in stations %}
-            <div class="station {% if disabled %}disabled{% endif %}">
+            <div class="station {% if disabled %}disabled{% endif %}" id="kiosk-{{ loop.index }}">
                 <div class="station-header">
                     <div class="station-name">{{ station.name }}</div>
                     <div class="station-location">📍 {{ station.location }}</div>
@@ -586,27 +644,31 @@
                 <div id="submission-message">
                     ✅ We have received your concern and sincerely apologize for any inconvenience. Please proceed to the next station. Thank you for your patience.
                 </div>
-                <button onclick="openChatbot()" class="chatbot-btn">💬 Chat with Bot</button>
-
+                <button onclick="toggleChatbotPanel()" class="chatbot-btn" id="chatbot-btn">💬 Chat with Bot</button>
+                <div class="chatbot-panel" id="chatbot-panel">
+                    <div class="chatbot-title">Chatbot Assistant</div>
+                    <div style="margin-bottom: 8px;">
+                        <label for="chatbot-model-select" style="font-size:14px;font-weight:600;color:#2E7D32;margin-right:8px;">Model:</label>
+                        <select id="chatbot-model-select" style="padding:6px 10px;border-radius:7px;border:1.5px solid #E0E0E0;font-size:14px;">
+                            <option value="gemini" selected>Gemini</option>
+                            <option value="openai">Openai</option>
+                            <option value="llama">Llama</option>
+                        </select>
+                    </div>
+                    <div class="chatbot-chatbox" id="chatbot-chatbox"></div>
+                    <div class="chatbot-input-row">
+                        <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Type your message..." />
+                        <button class="chatbot-send-btn" id="chatbot-send-btn">Send</button>
+                        <button class="chatbot-clear-btn" id="chatbot-clear-btn">Clear</button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-
-    <!-- Chatbot floating modal -->
-    <div id="chatbot-modal">
-        <button class="close-btn" onclick="closeChatbot()">×</button>
-        <iframe src="/chatbot"></iframe>
     </div>
 
     <script>
         let socket;
 
-        function openChatbot() {
-            document.getElementById('chatbot-modal').style.display = 'block';
-        }
-        function closeChatbot() {
-            document.getElementById('chatbot-modal').style.display = 'none';
-        }
 
         // Check if the WebSocket connection exists in sessionStorage
         if (sessionStorage.getItem('socket') === 'connected') {
@@ -682,6 +744,52 @@
                 });
             });
         });
+    </script>
+    <script src="/static/js/chatbot.js"></script>
+    <script>
+    // --- Live update points after chatbot use ---
+    // Wait for DOMContentLoaded to ensure elements exist
+    document.addEventListener('DOMContentLoaded', function() {
+        // Find the points display span
+        const pointsDisplay = document.querySelector('.stat-item span:nth-child(2)');
+        // Patch chatbot.js send logic if present
+        const sendBtn = document.getElementById('chatbot-send-btn');
+        if (sendBtn) {
+            sendBtn.addEventListener('click', function() {
+                // Wait for the fetch in chatbot.js to complete, then update points
+                // Use a MutationObserver to watch for new bot messages (response)
+                const chatbox = document.getElementById('chatbot-chatbox');
+                if (!chatbox) return;
+                const observer = new MutationObserver(function(mutationsList, observer) {
+                    // Look for the last bot message and try to get points from a global var or last fetch
+                    // Instead, patch fetch to always update points if response has .points
+                    // This is a fallback: after a short delay, try to get points from window.lastChatbotPoints
+                    setTimeout(function() {
+                        if (window.lastChatbotPoints !== undefined && pointsDisplay) {
+                            pointsDisplay.textContent = 'Points: ' + window.lastChatbotPoints;
+                        }
+                    }, 300);
+                });
+                observer.observe(chatbox, { childList: true });
+            });
+        }
+    });
+    // Patch fetch in chatbot.js to store points in window.lastChatbotPoints
+    (function() {
+        const oldFetch = window.fetch;
+        window.fetch = function() {
+            return oldFetch.apply(this, arguments).then(function(response) {
+                // Clone so we can read body twice
+                const clone = response.clone();
+                clone.json().then(function(data) {
+                    if (data && typeof data.points !== 'undefined') {
+                        window.lastChatbotPoints = data.points;
+                    }
+                }).catch(function(){});
+                return response;
+            });
+        };
+    })();
     </script>
 </body>
 </html>

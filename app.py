@@ -751,41 +751,70 @@ def eye_marker():
 @app.route('/kiosk_status', methods=['GET'])
 def kiosk_status():
     """
-    Analyze interaction_data.csv and return status for each kiosk:
-    - Red: High risk (many cyber attacks)
-    - Yellow: Medium risk (some cyber attacks)
-    - Green: Low risk (few or no cyber attacks)
+    For each kiosk, calculate weighted cyber attack probability:
+    - 60% from image attack probability (across all stations/kiosks)
+    - 40% from kiosk attack probability at this station (same kiosk number and station id, regardless of image)
+    Returns: {kiosk_id: {'image': ..., 'station_id': ..., 'weighted_attack_probability': ...}}
+    Always returns all 3 kiosks, even if occupied.
     """
-    attack_counts = {1: 0, 2: 0, 3: 0}
-    total_counts = {1: 0, 2: 0, 3: 0}
+    stations = session.get('stations', [])
+    station_id = session.get('trial', '')  # Use the current trial as the station id for all kiosks
+    result = {}
     try:
         with open(GameConfig.INTERACTION_DATA_CSV, 'r') as file:
-            reader = csv.DictReader(file)
+            reader = list(csv.DictReader(file))
+        for k in range(1, 4):
+            # Check if kiosk is occupied
+            status = stations[k-1]['status'] if stations and len(stations) >= k else ''
+            if status == 'Occupied':
+                result[k] = {
+                    'station_id': station_id,
+                    'weighted_attack_probability': 0.0,
+                    'image_attack_probability': 0.0,
+                    'kiosk_station_attack_probability': 0.0,
+                    'Status': status
+                }
+                continue
+            image = stations[k-1]['image'] if stations and len(stations) >= k else ''
+            image = image.lower().strip()
+            # Image-based attack stats
+            image_total = 0
+            image_attacks = 0
+            # Kiosk-at-this-station attack stats (regardless of image)
+            kiosk_total = 0
+            kiosk_attacks = 0
             for row in reader:
-                for k in range(1, 4):
-                    attack = row.get(f'Kiosk{k}_SelectedAttack', '')
-                    if attack:
-                        total_counts[k] += 1
-                        if attack.lower() == 'cyber attack':
-                            attack_counts[k] += 1
-        status = {}
-        ratios = {}
-        for k in [1, 2, 3]:
-            if total_counts[k] == 0:
-                status[k] = 'green'
-                ratios[k] = 0.0
-            else:
-                ratio = attack_counts[k] / total_counts[k]
-                ratios[k] = ratio
-                if ratio > KioskThresholds.YELLOW:
-                    status[k] = 'red'
-                elif ratio > KioskThresholds.GREEN:
-                    status[k] = 'yellow'
-                else:
-                    status[k] = 'green'
-        return jsonify({"status": status, "ratios": ratios})
+                # Image-based stats
+                for ki in range(1, 4):
+                    img_val = row.get(f'Kiosk{ki}_SelectedImage', '').lower().strip()
+                    attack_val = row.get(f'Kiosk{ki}_SelectedAttack', '').lower().strip()
+                    if img_val and img_val == image:
+                        image_total += 1
+                        if attack_val == 'cyber attack':
+                            image_attacks += 1
+                # Kiosk-at-this-station stats (regardless of image)
+                station_id_val = row.get('StationID', '').strip()
+                kiosk_attack_val = row.get(f'Kiosk{k}_SelectedAttack', '').lower().strip()
+                if str(station_id_val) == str(station_id):
+                    kiosk_total += 1
+                    if kiosk_attack_val == 'cyber attack':
+                        kiosk_attacks += 1
+            image_prob = (image_attacks / image_total) if image_total > 0 else 0.0
+            kiosk_prob = (kiosk_attacks / kiosk_total) if kiosk_total > 0 else 0.0
+            weighted_prob = round(0.6 * image_prob + 0.4 * kiosk_prob, 2)
+            # Debug output
+            #print(f"Kiosk {k} | Station {station_id} | Image '{image}' | image_total={image_total} image_attacks={image_attacks} kiosk_total={kiosk_total} kiosk_attacks={kiosk_attacks}")
+            result[k] = {
+                'station_id': station_id,
+                'weighted_attack_probability': weighted_prob,
+                'image_attack_probability': round(image_prob,2),
+                'kiosk_station_attack_probability': round(kiosk_prob,2),
+                'Status': status
+            }
+            print(result)
+        return jsonify(result)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({'error': str(e)}), 500
 
 # /////////////////////////////////////////////////////////////////////////////
 @app.route('/chatbot')
@@ -801,41 +830,64 @@ def chatbot():
         bots = ['gemini'] + bots
     return render_template('chatbot.html', bots=bots, default_bot='gemini')
 
+
 @app.route('/send_message', methods=['POST'])
 def send_message():
-    """Handle sending message to the selected chatbot"""
+    """Handle sending message to the selected chatbot and return station colors."""
     bot_name = request.json.get("bot") or "gemini"
     message = request.json.get("message")
+    print(bot_name)
 
-    if bot_name not in chatbots:
-        return jsonify({"error": "Bot not configured."}), 400
+    # Deduct 5 points for LLM usage
+    points = session.get('points', 0)
+    points = max(points - 5, GameConfig.MIN_POINTS)
+    session['points'] = points
+
+    if bot_name not in chatbots.keys():
+        return jsonify({"error": "Bot not configured.", "points": points}), 400
 
     try:
+        # Get kiosk status details as a dict
         resp = kiosk_status()
         if hasattr(resp, 'json'):
-            data = resp.json
+            kiosks_data = resp.json
         else:
-            data = resp.get_json()
-        status = data.get("status", {})
-        ratios = data.get("ratios", {})
-        # If user message is 'checknow', return raw data as a string in the same format as LLM reply
-        if isinstance(message, str) and message.strip().lower() == 'checknow':
-            raw_data = f"Kiosk status: {status}, Cyber Attack Ratios: {ratios}"
-            return jsonify({"reply": raw_data})
+            kiosks_data = resp.get_json()
 
-        print(ratios)
-        # Compose a detailed prompt for the LLM
-        kiosk_info = "\n".join([
-            f"Kiosk {k}: Status = {status.get(str(k), status.get(k, 'unknown'))}, Cyber Attack Ratio = {ratios.get(str(k), 0.0):.2f}"
-            for k in [1, 2, 3]
-        ])
+        # Compute color for each kiosk
         green = KioskThresholds.GREEN
         yellow = KioskThresholds.YELLOW
+        colors = {}
+        for k, v in kiosks_data.items():
+            prob = v.get('weighted_attack_probability', 0.0)
+            if v.get('Status', '').lower() == 'occupied':
+                colors[str(k)] = 'gray'
+            elif prob <= green:
+                colors[str(k)] = 'green'
+            elif prob <= yellow:
+                colors[str(k)] = 'yellow'
+            else:
+                colors[str(k)] = 'red'
+
+        # If user message is 'checknow', return all kiosk details
+        if isinstance(message, str) and message.strip().lower() == 'checknow':
+            return jsonify({"reply": f"Kiosk details: {kiosks_data}", "colors": colors, "points": points})
+
+        # Compose a detailed prompt for the LLM with all kiosk details
+        kiosk_info = "\n".join([
+            f"Kiosk {k}: Status = {v.get('Status', 'unknown')}, Station ID = {v.get('station_id', '')}, "
+            f"Weighted Attack Probability = {v.get('weighted_attack_probability', 0.0)}, Image Attack Probability = {v.get('image_attack_probability', 0.0)}, "
+            f"Kiosk Station Attack Probability = {v.get('kiosk_station_attack_probability', 0.0)}"
+            for k, v in kiosks_data.items()
+        ])
+
         system_prompt = (
             "You are a Help Agent for EV charging kiosks. Based on the safety color (green, yellow, red) and cyber attack risk, recommend the safest available kiosk for the user to use. "
             f"Green means low risk (≤ {green}), yellow is medium risk ({green} < ratio ≤ {yellow}), red is high risk (> {yellow}). "
             "Never recommend a kiosk that is occupied or unavailable. If all kiosks are risky, suggest the least risky available one. "
             "Be brief, clear, and do not mention numbers or ratios. Only mention the kiosk(s) and a short reason why the should or should not be chosen. "
+            "Also give a small explanation of you recommendation based on the image and station attack probabilities."
+            "High image attack probability means the image is likely a deepfake and risky."
             "Here is the current kiosk data:\n"
             f"{kiosk_info}"
             "Can you recommend the safest kiosk to use?"
@@ -849,29 +901,26 @@ def send_message():
                 model=chatbots["gemini"]["model"]
             )
             try:
-                print(full_prompt)
-        
                 answer = llm.invoke(full_prompt)
                 reply_text = getattr(answer, 'content', str(answer))
-                return jsonify({"reply": reply_text})
+                return jsonify({"reply": reply_text, "colors": colors, "points": points})
             except Exception as e:
-                return jsonify({"error": str(e)}), 500
+                return jsonify({"error": str(e), "points": points}), 500
         elif bot_name == "openai":
             llm = ChatOpenAI(
                 openai_api_key=chatbots["openai"]["api_key"],
                 model=chatbots["openai"]["model"]
             )
             try:
-               
                 answer = llm.invoke(full_prompt)
                 reply_text = getattr(answer, 'content', str(answer))
-                return jsonify({"reply": reply_text})
+                return jsonify({"reply": reply_text, "colors": colors, "points": points})
             except Exception as e:
-                return jsonify({"error": str(e)}), 500
+                return jsonify({"error": str(e), "points": points}), 500
         else:
-            return jsonify({"error": "Bot not configured."}), 400
+            return jsonify({"error": "Bot not configured.", "points": points}), 400
     except Exception as e:
-        return jsonify({"reply": f"Could not analyze kiosk safety: {e}"})
+        return jsonify({"reply": f"Could not analyze kiosk safety: {e}", "points": points})
 
 
 @app.route('/help_click', methods=['POST'])
@@ -895,6 +944,7 @@ def help_submit():
         writer.writerow([participant_id, timestamp, help_text, trial])
     
     return jsonify(success=True)
+
 
 # Move this function definition to the top of your file, before any Flask routes use it.
 def append_interaction_data(station_id, kiosks_data):

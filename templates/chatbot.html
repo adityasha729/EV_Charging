@@ -74,6 +74,10 @@
                 } else if (data.error) {
                     appendMessage('bot', 'Error: ' + data.error);
                 }
+                // Send colors to parent if present
+                if (data.colors && window.parent !== window) {
+                    window.parent.postMessage({ type: 'kioskColors', colors: data.colors }, '*');
+                }
             })
             .catch(() => appendMessage('bot', 'Error connecting to server.'));
         };
