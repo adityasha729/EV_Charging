@@ -791,6 +791,44 @@
         };
     })();
     </script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Log mouse movement (already present)
+    document.addEventListener('mousemove', function(e) {
+        const mouseData = {
+            x: e.clientX,
+            y: e.clientY,
+            timestamp: Date.now(),
+            page: window.location.pathname,
+            event: 'move'
+        };
+        if (!window.lastMouseSend || Date.now() - window.lastMouseSend > 100) {
+            window.lastMouseSend = Date.now();
+            fetch('/mouse_data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(mouseData)
+            });
+        }
+    });
+
+    // Log mouse clicks
+    document.addEventListener('click', function(e) {
+        const mouseData = {
+            x: e.clientX,
+            y: e.clientY,
+            timestamp: Date.now(),
+            page: window.location.pathname,
+            event: 'click'
+        };
+        fetch('/mouse_data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(mouseData)
+        });
+    });
+});
+</script>
 </body>
 </html>
 <!-- To ensure a new row is added for each station, you must collect all kiosk data and send it to Flask.

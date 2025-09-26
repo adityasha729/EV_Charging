@@ -153,7 +153,9 @@ def initialize_csv_files():
                 'Station 2 Random Numbers', 'Station 3 Status', 'Station 3 Image', 
                 'Station 3 Attack', 'Station 3 Probabilities', 'Station 3 Random Numbers', 
                 'Game Start Time', 'Game End Time', 'Charge Time', 'Drive Time', 
-                'Decision Time', 'Random Numbers'
+                'Decision Time', 'Random Numbers',
+                'Chatbot Prompt',           # <-- Add this
+                'Chatbot Suggested Kiosk'   # <-- Add this
             ])
     
     # Eye data CSV
@@ -180,6 +182,12 @@ def initialize_csv_files():
                 'Kiosk3_SelectedImage', 'Kiosk3_SelectedAttack', 'Kiosk3_MobileUPI', 'Kiosk3_ChargeAmount', 
                 'Kiosk3_PointsChange', 'Kiosk3_ChargeCost', 'Kiosk3_CyberAttackLoss', 'Kiosk3_StartingCharge', 'Kiosk3_EndingCharge'
             ])
+    
+    # Mouse data CSV
+    if not os.path.exists('mouse_data.csv'):
+        with open('mouse_data.csv', 'w', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            writer.writerow(['Participant ID', 'Timestamp', 'X', 'Y', 'Page', 'Event'])
 
 def is_game_over():
     """Check if game should end based on charge and trial count"""
@@ -318,7 +326,7 @@ def log_user_interaction(event, trial, **kwargs):
     timestamp = datetime.now()
     participant_id = session.get('participant_id', 'unknown')
     
-    with open(GameConfig.USER_INTERACTIONS_CSV, 'a', newline='') as file:
+    with open(GameConfig.USER_INTERACTIONS_CSV, 'a', newline='',encoding='utf-8') as file:
         writer = csv.writer(file)
         row = [participant_id, timestamp, event, trial]
         
@@ -330,7 +338,9 @@ def log_user_interaction(event, trial, **kwargs):
             'station_1_random_numbers', 'station_2_status', 'station_2_image', 'station_2_attack',
             'station_2_probabilities', 'station_2_random_numbers', 'station_3_status', 'station_3_image',
             'station_3_attack', 'station_3_probabilities', 'station_3_random_numbers', 'game_start_time',
-            'game_end_time', 'charge_time', 'drive_time', 'decision_time', 'random_numbers'
+            'game_end_time', 'charge_time', 'drive_time', 'decision_time', 'random_numbers',
+            'chatbot_prompt',            # <-- Add this
+            'chatbot_suggested_kiosk'    # <-- Add this
         ]
         
         for column in expected_columns:
@@ -338,11 +348,30 @@ def log_user_interaction(event, trial, **kwargs):
         
         writer.writerow(row)
 
-# def check_and_duplicate_interaction_data():
-   #(GameConfig.INTERACTION_DATA_CSV, 'r') as file:
-        #rows = list(csv.reader(file))
-    #if len(rows) == 21:  # header + 20 rows
-        #duplicate_interaction_data(target_rows=400)
+# Add this function after log_user_interaction and before the Flask routes
+def append_interaction_data(station_id, kiosks_data):
+    """
+    Append a row to interaction_data.csv for the current station.
+    kiosks_data: list of 3 dicts, each dict contains keys:
+      SelectedImage, SelectedAttack, MobileUPI, ChargeAmount, PointsChange, ChargeCost, CyberAttackLoss, StartingCharge, EndingCharge
+    """
+    row = [station_id]
+    for i in range(3):
+        kiosk = kiosks_data[i]
+        row.extend([
+            kiosk.get('SelectedImage', ''),
+            kiosk.get('SelectedAttack', ''),
+            kiosk.get('MobileUPI', ''),
+            kiosk.get('ChargeAmount', ''),
+            kiosk.get('PointsChange', ''),
+            kiosk.get('ChargeCost', ''),
+            kiosk.get('CyberAttackLoss', ''),
+            kiosk.get('StartingCharge', ''),
+            kiosk.get('EndingCharge', '')
+        ])
+    with open(GameConfig.INTERACTION_DATA_CSV, 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(row)
 
 # ==================== INITIALIZATION ====================
 
@@ -873,6 +902,18 @@ def send_message():
         if isinstance(message, str) and message.strip().lower() == 'checknow':
             return jsonify({"reply": f"Kiosk details: {kiosks_data}", "colors": colors, "points": points})
 
+        # 1. Find the safest available kiosk (lowest probability, not occupied)
+        safest_kiosk = None
+        min_prob = float('inf')
+        for k, v in kiosks_data.items():
+            if v.get('Status', '').lower() != 'occupied':
+                prob = v.get('weighted_attack_probability', 1.0)
+                if prob < min_prob:
+                    min_prob = prob
+                    safest_kiosk = k
+
+        suggested_kiosk = f"Kiosk {safest_kiosk}" if safest_kiosk else "None"
+
         # Compose a detailed prompt for the LLM with all kiosk details
         kiosk_info = "\n".join([
             f"Kiosk {k}: Status = {v.get('Status', 'unknown')}, Station ID = {v.get('station_id', '')}, "
@@ -903,6 +944,13 @@ def send_message():
             try:
                 answer = llm.invoke(full_prompt)
                 reply_text = getattr(answer, 'content', str(answer))
+                trial = session.get('trial', 0)
+                log_user_interaction(
+                    event='chatbot_interaction',
+                    trial=trial,
+                    chatbot_prompt=message,
+                    chatbot_suggested_kiosk=suggested_kiosk
+                )
                 return jsonify({"reply": reply_text, "colors": colors, "points": points})
             except Exception as e:
                 return jsonify({"error": str(e), "points": points}), 500
@@ -914,6 +962,13 @@ def send_message():
             try:
                 answer = llm.invoke(full_prompt)
                 reply_text = getattr(answer, 'content', str(answer))
+                trial = session.get('trial', 0)
+                log_user_interaction(
+                    event='chatbot_interaction',
+                    trial=trial,
+                    chatbot_prompt=message,
+                    chatbot_suggested_kiosk=suggested_kiosk
+                )
                 return jsonify({"reply": reply_text, "colors": colors, "points": points})
             except Exception as e:
                 return jsonify({"error": str(e), "points": points}), 500
@@ -947,29 +1002,29 @@ def help_submit():
 
 
 # Move this function definition to the top of your file, before any Flask routes use it.
-def append_interaction_data(station_id, kiosks_data):
-    """
-    Append a row to interaction_data.csv for the current station.
-    kiosks_data: list of 3 dicts, each dict contains keys:
-      SelectedImage, SelectedAttack, MobileUPI, ChargeAmount, PointsChange, ChargeCost, CyberAttackLoss, StartingCharge, EndingCharge
-    """
-    row = [station_id]
-    for i in range(3):
-        kiosk = kiosks_data[i]
-        row.extend([
-            kiosk.get('SelectedImage', ''),
-            kiosk.get('SelectedAttack', ''),
-            kiosk.get('MobileUPI', ''),
-            kiosk.get('ChargeAmount', ''),
-            kiosk.get('PointsChange', ''),
-            kiosk.get('ChargeCost', ''),
-            kiosk.get('CyberAttackLoss', ''),
-            kiosk.get('StartingCharge', ''),
-            kiosk.get('EndingCharge', '')
-        ])
-    with open(GameConfig.INTERACTION_DATA_CSV, 'a', newline='') as file:
+
+@app.route('/mouse_data', methods=['POST'])
+def mouse_data():
+    data = request.get_json()
+    participant_id = session.get('participant_id', 'unknown')
+    # Ensure CSV exists with header
+    csv_path = 'mouse_data.csv'
+    if not os.path.exists(csv_path):
+        with open(csv_path, 'w', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            writer.writerow(['Participant ID', 'Timestamp', 'X', 'Y', 'Page', 'Event'])
+    # Append mouse data
+    with open(csv_path, 'a', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
-        writer.writerow(row)
+        writer.writerow([
+            participant_id,
+            data.get('timestamp', ''),
+            data.get('x', ''),
+            data.get('y', ''),
+            data.get('page', ''),
+            data.get('event', '')
+        ])
+    return jsonify(success=True)
 
 # ==================== MAIN APPLICATION ====================
 
@@ -1000,29 +1055,7 @@ if __name__ == '__main__':
 # The code for this is missing in your file.
 # Add this function to save the data:
 
-def append_interaction_data(station_id, kiosks_data):
-    """
-    Append a row to interaction_data.csv for the current station.
-    kiosks_data: list of 3 dicts, each dict contains keys:
-      SelectedImage, SelectedAttack, MobileUPI, ChargeAmount, PointsChange, ChargeCost, CyberAttackLoss, StartingCharge, EndingCharge
-    """
-    row = [station_id]
-    for i in range(3):
-        kiosk = kiosks_data[i]
-        row.extend([
-            kiosk.get('SelectedImage', ''),
-            kiosk.get('SelectedAttack', ''),
-            kiosk.get('MobileUPI', ''),
-            kiosk.get('ChargeAmount', ''),
-            kiosk.get('PointsChange', ''),
-            kiosk.get('ChargeCost', ''),
-            kiosk.get('CyberAttackLoss', ''),
-            kiosk.get('StartingCharge', ''),
-            kiosk.get('EndingCharge', '')
-        ])
-    with open(GameConfig.INTERACTION_DATA_CSV, 'a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(row)
+
 
 # After each station visit (charging or skipping), call append_interaction_data to add the station's data.
 # For example, after a station is completed (in your charging or skip logic), add:
@@ -1040,14 +1073,4 @@ def save_station_to_interaction_data(trial, stations):
 # save_station_to_interaction_data(session['trial'], kiosks_data)
 # where kiosks_data is a list of 3 dicts for the 3 kiosks.
 
-# Example integration in start_charging or after station completion:
-# kiosks_data = [
-#     {'SelectedImage': ..., 'SelectedAttack': ..., ...},  # Kiosk 1
-#     {'SelectedImage': ..., 'SelectedAttack': ..., ...},  # Kiosk 2
-#     {'SelectedImage': ..., 'SelectedAttack': ..., ...}   # Kiosk 3
-# ]
-# save_station_to_interaction_data(session['trial'], kiosks_data)
-
 # This will ensure every station visit is appended to interaction_data.csv.
-
-# ...existing code...
