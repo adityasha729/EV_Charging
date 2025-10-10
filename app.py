@@ -7,6 +7,11 @@ import random
 import csv
 import os
 from datetime import datetime, timezone
+# Install: pip install selenium pillow
+# from selenium import webdriver
+# from transformers import BlipProcessor, BlipForConditionalGeneration
+import base64
+# from PIL import Image
 
 
 # ==================== CONFIGURATION PARAMETERS ====================
@@ -501,6 +506,16 @@ def index():
     
     log_user_interaction('index_page', trial, decision_time=decision_time)
     
+    # After rendering the station interface, capture screenshot and caption
+    # screenshot_path = capture_station_interface(trial)
+    # station_caption = caption_image(screenshot_path)
+    # print(f"Station {trial} interface caption: {station_caption}")
+
+    # # Optionally, log or save the caption to a file or CSV
+    # with open('station_captions.csv', 'a', newline='', encoding='utf-8') as file:
+    #     writer = csv.writer(file)
+    #     writer.writerow([trial, screenshot_path, station_caption])
+
     return render_template('index.html', 
                          stations=charging_stations,
                          show_skip_button=show_skip_button,
@@ -1000,31 +1015,45 @@ def help_submit():
     
     return jsonify(success=True)
 
+# Install: pip install selenium pillow
+from selenium import webdriver
+from PIL import Image
 
-# Move this function definition to the top of your file, before any Flask routes use it.
+def capture_station_screenshot(url, save_path):
+    driver = webdriver.Chrome()  # Or use your preferred browser
+    driver.get(url)
+    driver.save_screenshot(save_path)
+    driver.quit()
 
-@app.route('/mouse_data', methods=['POST'])
-def mouse_data():
+def capture_station_interface(trial):
+    """Capture screenshot of the station interface and return the image path."""
+    url = f"http://localhost:5000/index?trial={trial}"
+    save_path = f"station_interface_{trial}.png"
+    driver = webdriver.Chrome()
+    driver.get(url)
+    driver.save_screenshot(save_path)
+    driver.quit()
+    return save_path
+
+@app.route('/upload_screenshot', methods=['POST'])
+def upload_screenshot():
     data = request.get_json()
-    participant_id = session.get('participant_id', 'unknown')
-    # Ensure CSV exists with header
-    csv_path = 'mouse_data.csv'
-    if not os.path.exists(csv_path):
-        with open(csv_path, 'w', newline='', encoding='utf-8') as file:
-            writer = csv.writer(file)
-            writer.writerow(['Participant ID', 'Timestamp', 'X', 'Y', 'Page', 'Event'])
-    # Append mouse data
-    with open(csv_path, 'a', newline='', encoding='utf-8') as file:
-        writer = csv.writer(file)
-        writer.writerow([
-            participant_id,
-            data.get('timestamp', ''),
-            data.get('x', ''),
-            data.get('y', ''),
-            data.get('page', ''),
-            data.get('event', '')
-        ])
-    return jsonify(success=True)
+    image_data = data['image'].split(',')[1]  # Remove data:image/png;base64,
+    trial = data.get('trial', 0)
+    image_bytes = base64.b64decode(image_data)
+    image_path = f'station_interface_{trial}.png'
+    with open(image_path, 'wb') as f:
+        f.write(image_bytes)
+    # caption = caption_image(image_path)
+    # Save to CSV
+    # with open('station_captions.csv', 'a', newline='', encoding='utf-8') as file:
+    #     writer = csv.writer(file)
+    #     writer.writerow([trial, image_path, caption])
+    # return jsonify({'caption': caption})
+
+    return jsonify({'status': 'success'})
+
+
 
 # ==================== MAIN APPLICATION ====================
 
@@ -1039,26 +1068,6 @@ if __name__ == '__main__':
     print("="*60)
     app.run(debug=True)
 
-# If you see "You exceeded your current quota", you must:
-# 1. Check your OpenAI account billing and usage at https://platform.openai.com/account/usage
-# 2. Add payment method or upgrade your plan if needed.
-# 3. Wait for quota reset if you are on a free trial.
-# No code change will fix this; it is an account/billing issue.
-
-# Yes, you need to go through all 20 stations once (each trial/station visit).
-# After each station, your code should append the kiosk data for that station to interaction_data.csv.
-# Once you have completed all 20 stations (so interaction_data.csv has 20 rows + header),
-# the duplication logic will automatically expand it to 400 rows for future use.
-# The file will persist and not be cleared on app restart.
-
-# You must explicitly append the kiosk data for each station to interaction_data.csv.
-# The code for this is missing in your file.
-# Add this function to save the data:
-
-
-
-# After each station visit (charging or skipping), call append_interaction_data to add the station's data.
-# For example, after a station is completed (in your charging or skip logic), add:
 
 def save_station_to_interaction_data(trial, stations):
     """
@@ -1069,8 +1078,3 @@ def save_station_to_interaction_data(trial, stations):
     """
     append_interaction_data(trial, stations)
 
-# In your charging or skip logic, after the station is completed, call:
-# save_station_to_interaction_data(session['trial'], kiosks_data)
-# where kiosks_data is a list of 3 dicts for the 3 kiosks.
-
-# This will ensure every station visit is appended to interaction_data.csv.
