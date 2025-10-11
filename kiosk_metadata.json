@@ -1,0 +1,26 @@
+[
+  {
+    "text": "The kiosk displayed a 70% coupon with a distorted celebrity face.",
+    "cyberattack": true,
+    "meta": {
+      "station": 5,
+      "kiosk": 2
+    }
+  },
+  {
+    "text": "Normal charging UI with no suspicious offers.",
+    "cyberattack": false,
+    "meta": {
+      "station": 2,
+      "kiosk": 1
+    }
+  },
+  {
+    "text": "Free QR code for discount; required email login form.",
+    "cyberattack": true,
+    "meta": {
+      "station": 8,
+      "kiosk": 3
+    }
+  }
+]
