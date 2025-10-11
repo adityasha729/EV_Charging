@@ -68,50 +68,11 @@ class GameConfig:
 from vision_utils import generate_caption_gemini
 
 # Backend context to store latest screenshot description per session
-
-import json
-
-def get_participant_id():
-    return session.get('participant_id', 'unknown')
-
-def get_screenshot_history_path():
-    participant_id = get_participant_id()
-    os.makedirs('station_screenshots', exist_ok=True)
-    return f'station_screenshots/screenshot_history_{participant_id}.json'
-
-def get_charging_context_path():
-    participant_id = get_participant_id()
-    os.makedirs('station_screenshots', exist_ok=True)
-    return f'station_screenshots/charging_context_{participant_id}.json'
-
-def load_json_file(path, default):
-    try:
-        with open(path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception:
-        return default
-
-def save_json_file(path, data):
-    with open(path, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False)
-
 def get_screenshot_context():
-    # Return the latest screenshot description for this participant
-    path = get_screenshot_history_path()
-    history = load_json_file(path, {})
-    if not history:
-        return None
-    # Return the latest (highest trial) description
-    try:
-        latest_trial = max(map(int, history.keys()))
-        return history[str(latest_trial)]
-    except Exception:
-        return None
+    return session.get('screenshot_description', None)
 
 def set_screenshot_context(description):
-    # Store the latest screenshot description for this participant
-    # (for compatibility, but not used for history)
-    pass
+    session['screenshot_description'] = description
 
 
 load_dotenv()
@@ -639,7 +600,6 @@ def start_charging():
     session["starting_charge"] = starting_charge
     session["ending_charge"] = ending_charge
     
-
     # Log the interaction
     log_user_interaction('start_charging', trial, 
                         station_id=station_id, 
@@ -654,39 +614,6 @@ def start_charging():
                         ending_charge=ending_charge,
                         random_numbers=session['stations'][station_id-1]['random_numbers'])
     print("DEBUG:", starting_charge, ending_charge, charge_amount)
-
-
-    # Load screenshot_history from file
-    screenshot_history_path = get_screenshot_history_path()
-    screenshot_history = load_json_file(screenshot_history_path, {})
-    desc_json = screenshot_history.get(str(trial))
-    kiosk_visual = {}
-    if desc_json:
-        try:
-            desc_json_obj = json.loads(str(desc_json))
-            kiosk_key = f"Kiosk {station_id}"
-            kiosk_visual = desc_json_obj.get(kiosk_key, {})
-        except Exception:
-            kiosk_visual = {}
-
-    charging_event = {
-        "trial": trial,
-        "kiosk": station_id,
-        "image": image_shown,
-        "attack": attack,
-        "cyber_attacked": attack == "Cyber Attack",
-        "charge_amount": charge_amount,
-        "points_after": session['points'],
-        "ending_charge": session['charge'],
-        "visual_content": kiosk_visual.get("Visual Content", ""),
-        "anomalies": kiosk_visual.get("Anomalies", "")
-    }
-
-    # Store charging_context in file
-    charging_context_path = get_charging_context_path()
-    charging_context = load_json_file(charging_context_path, [])
-    charging_context.append(charging_event)
-    save_json_file(charging_context_path, charging_context)
 
     # After processing charging, build kiosks_data for all kiosks in this station
     kiosks_data = []
@@ -991,45 +918,12 @@ def send_message():
         return jsonify({"reply": f"Kiosk details: {kiosks_data}", "colors": colors, "points": points})
 
 
-
-
-    # Compose a system prompt for the LLM to guide its behavior
-    green = KioskThresholds.GREEN
-    yellow = KioskThresholds.YELLOW
-    help_agent_prompt = (
-        f"You are a Help Agent for EV charging kiosks. Based on cyber attack risk, recommend the safest available kiosk for the user to use. "
-        "Never recommend a kiosk that is occupied or unavailable. If all kiosks are risky, suggest the least risky available one or you may suggest to skip. "
-        "Be brief, clear, and do not mention numbers or ratios. Only mention the kiosk(s) and a short reason why they should or should not be chosen. "
-        "Also give a small explanation of your recommendation based on the descriptions below. "
-        "Following this you will be given previous kiosk description which the user picked and whether user had faced cyberattack. "
-        "This will be followed by the UI description of the current 3 kiosk. Similar kiosk will have similar cyberattack chances. \n"
-    )
-
-
-    # Load charging_context from file
-    charging_context_path = get_charging_context_path()
-    charging_context = load_json_file(charging_context_path, [])
-    context_lines = []
-    for event in charging_context:
-        context_lines.append(
-            f"Station {event['trial']} (Kiosk {event['kiosk']}): "
-            f"Attack: {event['attack']}, "
-            f"Cyberattacked: {event['cyber_attacked']}, "
-            f"Visual: {event.get('visual_content', '')}, "
-            f"Anomalies: {event.get('anomalies', '')}, "
-            f"Charge: {event['charge_amount']}, "
-            f"Points after: {event['points_after']}, "
-            f"Ending charge: {event['ending_charge']}"
-        )
-    context_str = "\n".join(context_lines)
-
+    # Compose a simple prompt for the LLM with screenshot context only
     screenshot_context = get_screenshot_context()
-    full_prompt = help_agent_prompt
-    if context_str:
-        full_prompt += f"Previous station context:\n{context_str}\n\n"
     if screenshot_context:
-        full_prompt += f"Screenshot Analysis: {screenshot_context}\n\n"
-    full_prompt += f"User question: {message}"
+        full_prompt = f"Screenshot Analysis: {screenshot_context}\n\nUser question: {message}"
+    else:
+        full_prompt = message
 
     suggested_kiosk = "None"
 
@@ -1158,20 +1052,7 @@ def upload_screenshot():
     }
     """
     description = generate_caption_gemini(image_path, prompt)
-    # Store screenshot description per trial in session
-    try:
-        trial_int = int(trial)
-    except Exception:
-        trial_int = trial
-
-    # Save screenshot_history to file
-    screenshot_history_path = get_screenshot_history_path()
-    screenshot_history = load_json_file(screenshot_history_path, {})
-    description_cleaned = description.strip().strip('`')[4:]
-    screenshot_history[str(trial_int)] = description_cleaned
-    save_json_file(screenshot_history_path, screenshot_history)
     set_screenshot_context(description)
-
     return jsonify({'description': description})
 
 

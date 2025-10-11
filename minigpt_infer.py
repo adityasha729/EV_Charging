@@ -63,8 +63,42 @@ if __name__ == "__main__":
     # Ensure the Google GenAI library is installed: pip install google-genai
     
     image_path = input("🖼️ Enter image path: ").strip()
-    prompt = "Analyze this EV charging network user interface. For each 'Kiosk' section (Kiosk 1, Kiosk 2, Kiosk 3), describe its status, any active promotions, and specifically describe the visual content of any images or graphics displayed within its promotion or coupon section. Use a structured format for each kiosk. And if if any kiosk's status is occupied then do not need to give this much information just say its occupied and try to mainly focus on the image shown as coupon in the other available kiosks. If there are no images or graphics displayed within a kiosk's promotion or coupon section, simply state 'No visual content available"
-    
+    """
+    prompt = '''
+    Analyze this EV charging network user interface.
+    For each 'Kiosk' section (Kiosk 1, Kiosk 2, Kiosk 3), describe its status, any active promotions,
+    and specifically describe the visual content of any images or graphics displayed within its promotion or coupon section.
+    Use a structured format for each kiosk.
+    And if if any kiosk's status is occupied then do not need to give this much information just say its occupied and try to mainly focus on the image shown as coupon in the other available kiosks.
+    If there are no images or graphics displayed within a kiosk's promotion or coupon section, simply state 'No visual content available'''
+    """
+
+    prompt = """
+    You are an expert in analyzing EV charging network user interfaces for signs of potential cyberattacks.
+    Analyze the given interface carefully.
+    For each Kiosk section (Kiosk 1, Kiosk 2, Kiosk 3):
+    Describe the visual content shown in its promotion or coupon area (images, graphics, text, faces, QR codes, etc.).
+    Identify any anomalies or signs of cyberattack, such as deepfake or AI-generated images, unrealistic discounts, phishing prompts, or suspicious branding.
+
+    If a kiosk's status is Occupied, simply output "Visual Content": "Occupied" and "Anomalies": "None".
+    If no images or graphics appear, write "Visual Content": "No visual content available".
+
+    Return the result strictly in JSON format as (return as string not in json, as we are directly parsing it):
+    {
+        "Kiosk 1": {
+            "Visual Content": "...",
+            "Anomalies": "..."
+        },
+        "Kiosk 2": {
+            "Visual Content": "...",
+            "Anomalies": "..."
+        },
+        "Kiosk 3": {
+            "Visual Content": "...",
+            "Anomalies": "..."
+        }
+    }
+    """
     # Use a more descriptive default prompt for better results from Gemini
     if not prompt:
         prompt = "Describe this image in detail"

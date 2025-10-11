@@ -68,50 +68,11 @@ class GameConfig:
 from vision_utils import generate_caption_gemini
 
 # Backend context to store latest screenshot description per session
-
-import json
-
-def get_participant_id():
-    return session.get('participant_id', 'unknown')
-
-def get_screenshot_history_path():
-    participant_id = get_participant_id()
-    os.makedirs('station_screenshots', exist_ok=True)
-    return f'station_screenshots/screenshot_history_{participant_id}.json'
-
-def get_charging_context_path():
-    participant_id = get_participant_id()
-    os.makedirs('station_screenshots', exist_ok=True)
-    return f'station_screenshots/charging_context_{participant_id}.json'
-
-def load_json_file(path, default):
-    try:
-        with open(path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception:
-        return default
-
-def save_json_file(path, data):
-    with open(path, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False)
-
 def get_screenshot_context():
-    # Return the latest screenshot description for this participant
-    path = get_screenshot_history_path()
-    history = load_json_file(path, {})
-    if not history:
-        return None
-    # Return the latest (highest trial) description
-    try:
-        latest_trial = max(map(int, history.keys()))
-        return history[str(latest_trial)]
-    except Exception:
-        return None
+    return session.get('screenshot_description', None)
 
 def set_screenshot_context(description):
-    # Store the latest screenshot description for this participant
-    # (for compatibility, but not used for history)
-    pass
+    session['screenshot_description'] = description
 
 
 load_dotenv()
@@ -655,19 +616,21 @@ def start_charging():
                         random_numbers=session['stations'][station_id-1]['random_numbers'])
     print("DEBUG:", starting_charge, ending_charge, charge_amount)
 
+    # Store only the chosen kiosk's info in session['charging_context']
+    #screenshot_history = session.get('screenshot_history', {})
+    screenshot_history = session['screenshot_history']
 
-    # Load screenshot_history from file
-    screenshot_history_path = get_screenshot_history_path()
-    screenshot_history = load_json_file(screenshot_history_path, {})
     desc_json = screenshot_history.get(str(trial))
+
+    import json
     kiosk_visual = {}
     if desc_json:
-        try:
-            desc_json_obj = json.loads(str(desc_json))
-            kiosk_key = f"Kiosk {station_id}"
-            kiosk_visual = desc_json_obj.get(kiosk_key, {})
-        except Exception:
-            kiosk_visual = {}
+        desc_json_obj = json.loads(str(desc_json))
+        kiosk_key = f"Kiosk {station_id}"
+        kiosk_visual = desc_json_obj.get(kiosk_key, {})
+
+    
+    print("#####################",kiosk_visual)
 
     charging_event = {
         "trial": trial,
@@ -682,11 +645,11 @@ def start_charging():
         "anomalies": kiosk_visual.get("Anomalies", "")
     }
 
-    # Store charging_context in file
-    charging_context_path = get_charging_context_path()
-    charging_context = load_json_file(charging_context_path, [])
-    charging_context.append(charging_event)
-    save_json_file(charging_context_path, charging_context)
+    print("#####################",charging_event)
+
+    if 'charging_context' not in session:
+        session['charging_context'] = []
+    session['charging_context'].append(charging_event)
 
     # After processing charging, build kiosks_data for all kiosks in this station
     kiosks_data = []
@@ -1005,10 +968,7 @@ def send_message():
         "This will be followed by the UI description of the current 3 kiosk. Similar kiosk will have similar cyberattack chances. \n"
     )
 
-
-    # Load charging_context from file
-    charging_context_path = get_charging_context_path()
-    charging_context = load_json_file(charging_context_path, [])
+    charging_context = session.get('charging_context', [])
     context_lines = []
     for event in charging_context:
         context_lines.append(
@@ -1163,15 +1123,12 @@ def upload_screenshot():
         trial_int = int(trial)
     except Exception:
         trial_int = trial
-
-    # Save screenshot_history to file
-    screenshot_history_path = get_screenshot_history_path()
-    screenshot_history = load_json_file(screenshot_history_path, {})
+    if 'screenshot_history' not in session:
+        session['screenshot_history'] = {}
     description_cleaned = description.strip().strip('`')[4:]
-    screenshot_history[str(trial_int)] = description_cleaned
-    save_json_file(screenshot_history_path, screenshot_history)
+    session['screenshot_history'][str(trial_int)] = description_cleaned
     set_screenshot_context(description)
-
+    print("Screenshot description:", description_cleaned)
     return jsonify({'description': description})
 
 

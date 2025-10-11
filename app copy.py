@@ -61,57 +61,7 @@ class GameConfig:
     # File extensions
     ALLOWED_IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg']
 
-
 # ==================== FLASK APP INITIALIZATION ====================
-
-# Import vision_utils for Gemini Vision captioning
-from vision_utils import generate_caption_gemini
-
-# Backend context to store latest screenshot description per session
-
-import json
-
-def get_participant_id():
-    return session.get('participant_id', 'unknown')
-
-def get_screenshot_history_path():
-    participant_id = get_participant_id()
-    os.makedirs('station_screenshots', exist_ok=True)
-    return f'station_screenshots/screenshot_history_{participant_id}.json'
-
-def get_charging_context_path():
-    participant_id = get_participant_id()
-    os.makedirs('station_screenshots', exist_ok=True)
-    return f'station_screenshots/charging_context_{participant_id}.json'
-
-def load_json_file(path, default):
-    try:
-        with open(path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception:
-        return default
-
-def save_json_file(path, data):
-    with open(path, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False)
-
-def get_screenshot_context():
-    # Return the latest screenshot description for this participant
-    path = get_screenshot_history_path()
-    history = load_json_file(path, {})
-    if not history:
-        return None
-    # Return the latest (highest trial) description
-    try:
-        latest_trial = max(map(int, history.keys()))
-        return history[str(latest_trial)]
-    except Exception:
-        return None
-
-def set_screenshot_context(description):
-    # Store the latest screenshot description for this participant
-    # (for compatibility, but not used for history)
-    pass
 
 
 load_dotenv()
@@ -639,7 +589,6 @@ def start_charging():
     session["starting_charge"] = starting_charge
     session["ending_charge"] = ending_charge
     
-
     # Log the interaction
     log_user_interaction('start_charging', trial, 
                         station_id=station_id, 
@@ -654,39 +603,6 @@ def start_charging():
                         ending_charge=ending_charge,
                         random_numbers=session['stations'][station_id-1]['random_numbers'])
     print("DEBUG:", starting_charge, ending_charge, charge_amount)
-
-
-    # Load screenshot_history from file
-    screenshot_history_path = get_screenshot_history_path()
-    screenshot_history = load_json_file(screenshot_history_path, {})
-    desc_json = screenshot_history.get(str(trial))
-    kiosk_visual = {}
-    if desc_json:
-        try:
-            desc_json_obj = json.loads(str(desc_json))
-            kiosk_key = f"Kiosk {station_id}"
-            kiosk_visual = desc_json_obj.get(kiosk_key, {})
-        except Exception:
-            kiosk_visual = {}
-
-    charging_event = {
-        "trial": trial,
-        "kiosk": station_id,
-        "image": image_shown,
-        "attack": attack,
-        "cyber_attacked": attack == "Cyber Attack",
-        "charge_amount": charge_amount,
-        "points_after": session['points'],
-        "ending_charge": session['charge'],
-        "visual_content": kiosk_visual.get("Visual Content", ""),
-        "anomalies": kiosk_visual.get("Anomalies", "")
-    }
-
-    # Store charging_context in file
-    charging_context_path = get_charging_context_path()
-    charging_context = load_json_file(charging_context_path, [])
-    charging_context.append(charging_event)
-    save_json_file(charging_context_path, charging_context)
 
     # After processing charging, build kiosks_data for all kiosks in this station
     kiosks_data = []
@@ -974,106 +890,107 @@ def send_message():
     if bot_name not in chatbots.keys():
         return jsonify({"error": "Bot not configured.", "points": points}), 400
 
+    try:
+        # Get kiosk status details as a dict
+        resp = kiosk_status()
+        if hasattr(resp, 'json'):
+            kiosks_data = resp.json
+        else:
+            kiosks_data = resp.get_json()
 
-    # Get kiosk status details as a dict
-    resp = kiosk_status()
-    # if hasattr(resp, 'json'):
-    #     kiosks_data = resp.json
-    # else:
-    #     kiosks_data = resp.get_json()
-    kiosks_data = {}
+        # Compute color for each kiosk
+        green = KioskThresholds.GREEN
+        yellow = KioskThresholds.YELLOW
+        colors = {}
+        for k, v in kiosks_data.items():
+            prob = v.get('weighted_attack_probability', 0.0)
+            if v.get('Status', '').lower() == 'occupied':
+                colors[str(k)] = 'gray'
+            elif prob <= green:
+                colors[str(k)] = 'green'
+            elif prob <= yellow:
+                colors[str(k)] = 'yellow'
+            else:
+                colors[str(k)] = 'red'
 
-    # Always return three yellows for colors (Kiosk 1, 2, 3)
-    colors = {"1": "yellow", "2": "yellow", "3": "yellow"}
+        # If user message is 'checknow', return all kiosk details
+        if isinstance(message, str) and message.strip().lower() == 'checknow':
+            return jsonify({"reply": f"Kiosk details: {kiosks_data}", "colors": colors, "points": points})
 
-    # If user message is 'checknow', return all kiosk details
-    if isinstance(message, str) and message.strip().lower() == 'checknow':
-        return jsonify({"reply": f"Kiosk details: {kiosks_data}", "colors": colors, "points": points})
+        # 1. Find the safest available kiosk (lowest probability, not occupied)
+        safest_kiosk = None
+        min_prob = float('inf')
+        for k, v in kiosks_data.items():
+            if v.get('Status', '').lower() != 'occupied':
+                prob = v.get('weighted_attack_probability', 1.0)
+                if prob < min_prob:
+                    min_prob = prob
+                    safest_kiosk = k
 
+        suggested_kiosk = f"Kiosk {safest_kiosk}" if safest_kiosk else "None"
 
+        # Compose a detailed prompt for the LLM with all kiosk details
+        kiosk_info = "\n".join([
+            f"Kiosk {k}: Status = {v.get('Status', 'unknown')}, Station ID = {v.get('station_id', '')}, "
+            f"Weighted Attack Probability = {v.get('weighted_attack_probability', 0.0)}, Image Attack Probability = {v.get('image_attack_probability', 0.0)}, "
+            f"Kiosk Station Attack Probability = {v.get('kiosk_station_attack_probability', 0.0)}"
+            for k, v in kiosks_data.items()
+        ])
 
-
-    # Compose a system prompt for the LLM to guide its behavior
-    green = KioskThresholds.GREEN
-    yellow = KioskThresholds.YELLOW
-    help_agent_prompt = (
-        f"You are a Help Agent for EV charging kiosks. Based on cyber attack risk, recommend the safest available kiosk for the user to use. "
-        "Never recommend a kiosk that is occupied or unavailable. If all kiosks are risky, suggest the least risky available one or you may suggest to skip. "
-        "Be brief, clear, and do not mention numbers or ratios. Only mention the kiosk(s) and a short reason why they should or should not be chosen. "
-        "Also give a small explanation of your recommendation based on the descriptions below. "
-        "Following this you will be given previous kiosk description which the user picked and whether user had faced cyberattack. "
-        "This will be followed by the UI description of the current 3 kiosk. Similar kiosk will have similar cyberattack chances. \n"
-    )
-
-
-    # Load charging_context from file
-    charging_context_path = get_charging_context_path()
-    charging_context = load_json_file(charging_context_path, [])
-    context_lines = []
-    for event in charging_context:
-        context_lines.append(
-            f"Station {event['trial']} (Kiosk {event['kiosk']}): "
-            f"Attack: {event['attack']}, "
-            f"Cyberattacked: {event['cyber_attacked']}, "
-            f"Visual: {event.get('visual_content', '')}, "
-            f"Anomalies: {event.get('anomalies', '')}, "
-            f"Charge: {event['charge_amount']}, "
-            f"Points after: {event['points_after']}, "
-            f"Ending charge: {event['ending_charge']}"
+        system_prompt = (
+            "You are a Help Agent for EV charging kiosks. Based on the safety color (green, yellow, red) and cyber attack risk, recommend the safest available kiosk for the user to use. "
+            f"Green means low risk (≤ {green}), yellow is medium risk ({green} < ratio ≤ {yellow}), red is high risk (> {yellow}). "
+            "Never recommend a kiosk that is occupied or unavailable. If all kiosks are risky, suggest the least risky available one. "
+            "Be brief, clear, and do not mention numbers or ratios. Only mention the kiosk(s) and a short reason why the should or should not be chosen. "
+            "Also give a small explanation of you recommendation based on the image and station attack probabilities."
+            "High image attack probability means the image is likely a deepfake and risky."
+            "Here is the current kiosk data:\n"
+            f"{kiosk_info}"
+            "Can you recommend the safest kiosk to use?"
         )
-    context_str = "\n".join(context_lines)
-
-    screenshot_context = get_screenshot_context()
-    full_prompt = help_agent_prompt
-    if context_str:
-        full_prompt += f"Previous station context:\n{context_str}\n\n"
-    if screenshot_context:
-        full_prompt += f"Screenshot Analysis: {screenshot_context}\n\n"
-    full_prompt += f"User question: {message}"
-
-    suggested_kiosk = "None"
-
-    print("Full prompt to LLM:", full_prompt)
-
-    # Use LLM to answer
-    if bot_name == "gemini":
-        llm = ChatGoogleGenerativeAI(
-            google_api_key=chatbots["gemini"]["api_key"],
-            model=chatbots["gemini"]["model"]
-        )
-        try:
-            answer = llm.invoke(full_prompt)
-            reply_text = getattr(answer, 'content', str(answer))
-            trial = session.get('trial', 0)
-            log_user_interaction(
-                event='chatbot_interaction',
-                trial=trial,
-                chatbot_prompt=message,
-                chatbot_suggested_kiosk=suggested_kiosk
+        # The user's original question is appended for context
+        full_prompt = system_prompt + "\n\nUser question: " + message
+        # Use LLM to answer
+        if bot_name == "gemini":
+            llm = ChatGoogleGenerativeAI(
+                google_api_key=chatbots["gemini"]["api_key"],
+                model=chatbots["gemini"]["model"]
             )
-            return jsonify({"reply": reply_text, "colors": colors, "points": points})
-        except Exception as e:
-            return jsonify({"error": str(e), "points": points}), 500
-    elif bot_name == "openai":
-        llm = ChatOpenAI(
-            openai_api_key=chatbots["openai"]["api_key"],
-            model=chatbots["openai"]["model"]
-        )
-        try:
-            answer = llm.invoke(full_prompt)
-            reply_text = getattr(answer, 'content', str(answer))
-            trial = session.get('trial', 0)
-            log_user_interaction(
-                event='chatbot_interaction',
-                trial=trial,
-                chatbot_prompt=message,
-                chatbot_suggested_kiosk=suggested_kiosk
+            try:
+                answer = llm.invoke(full_prompt)
+                reply_text = getattr(answer, 'content', str(answer))
+                trial = session.get('trial', 0)
+                log_user_interaction(
+                    event='chatbot_interaction',
+                    trial=trial,
+                    chatbot_prompt=message,
+                    chatbot_suggested_kiosk=suggested_kiosk
+                )
+                return jsonify({"reply": reply_text, "colors": colors, "points": points})
+            except Exception as e:
+                return jsonify({"error": str(e), "points": points}), 500
+        elif bot_name == "openai":
+            llm = ChatOpenAI(
+                openai_api_key=chatbots["openai"]["api_key"],
+                model=chatbots["openai"]["model"]
             )
-            return jsonify({"reply": reply_text, "colors": colors, "points": points})
-        except Exception as e:
-            return jsonify({"error": str(e), "points": points}), 500
-    else:
-        return jsonify({"error": "Bot not configured.", "points": points}), 400
+            try:
+                answer = llm.invoke(full_prompt)
+                reply_text = getattr(answer, 'content', str(answer))
+                trial = session.get('trial', 0)
+                log_user_interaction(
+                    event='chatbot_interaction',
+                    trial=trial,
+                    chatbot_prompt=message,
+                    chatbot_suggested_kiosk=suggested_kiosk
+                )
+                return jsonify({"reply": reply_text, "colors": colors, "points": points})
+            except Exception as e:
+                return jsonify({"error": str(e), "points": points}), 500
+        else:
+            return jsonify({"error": "Bot not configured.", "points": points}), 400
+    except Exception as e:
+        return jsonify({"reply": f"Could not analyze kiosk safety: {e}", "points": points})
 
 
 @app.route('/help_click', methods=['POST'])
@@ -1119,60 +1036,22 @@ def capture_station_interface(trial):
     return save_path
 
 @app.route('/upload_screenshot', methods=['POST'])
-
 def upload_screenshot():
     data = request.get_json()
     image_data = data['image'].split(',')[1]  # Remove data:image/png;base64,
     trial = data.get('trial', 0)
     image_bytes = base64.b64decode(image_data)
-    os.makedirs('station_screenshots', exist_ok=True)
-    image_path = f'station_screenshots/station_interface_{trial}.png'
+    image_path = f'station_interface_{trial}.png'
     with open(image_path, 'wb') as f:
         f.write(image_bytes)
+    # caption = caption_image(image_path)
+    # Save to CSV
+    # with open('station_captions.csv', 'a', newline='', encoding='utf-8') as file:
+    #     writer = csv.writer(file)
+    #     writer.writerow([trial, image_path, caption])
+    # return jsonify({'caption': caption})
 
-    # Generate description using Gemini Vision
-    prompt = """
-    You are an expert in analyzing EV charging network user interfaces for signs of potential cyberattacks.
-    Analyze the given interface carefully.
-    For each Kiosk section (Kiosk 1, Kiosk 2, Kiosk 3):
-    Describe the visual content shown in its promotion or coupon area (images, graphics, text, faces, QR codes, etc.).
-    Identify any anomalies or signs of cyberattack, such as deepfake or AI-generated images, unrealistic discounts, phishing prompts, or suspicious branding.
-
-    If a kiosk's status is Occupied, simply output "Visual Content": "Occupied" and "Anomalies": "None".
-    If no images or graphics appear, write "Visual Content": "No visual content available".
-
-    Return the result strictly in JSON format as:
-    {
-        "Kiosk 1": {
-            "Visual Content": "...",
-            "Anomalies": "..."
-        },
-        "Kiosk 2": {
-            "Visual Content": "...",
-            "Anomalies": "..."
-        },
-        "Kiosk 3": {
-            "Visual Content": "...",
-            "Anomalies": "..."
-        }
-    }
-    """
-    description = generate_caption_gemini(image_path, prompt)
-    # Store screenshot description per trial in session
-    try:
-        trial_int = int(trial)
-    except Exception:
-        trial_int = trial
-
-    # Save screenshot_history to file
-    screenshot_history_path = get_screenshot_history_path()
-    screenshot_history = load_json_file(screenshot_history_path, {})
-    description_cleaned = description.strip().strip('`')[4:]
-    screenshot_history[str(trial_int)] = description_cleaned
-    save_json_file(screenshot_history_path, screenshot_history)
-    set_screenshot_context(description)
-
-    return jsonify({'description': description})
+    return jsonify({'status': 'success'})
 
 
 

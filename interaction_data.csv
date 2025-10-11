@@ -451,3 +451,27 @@ StationID,Kiosk1_SelectedImage,Kiosk1_SelectedAttack,Kiosk1_MobileUPI,Kiosk1_Cha
 3,deepfake6.png,Cyber Attack,7687689687,12,0,25.0,10.0,10,22.0,deepfake3.png,Cyber Attack,,,0,,,,,None,None,,,0,,,,
 5,real8.png,Safe,,,0,,,,,real6.png,Safe,7687689687,20,0,20.0,0,11.0,31.0,None,None,,,0,,,,
 >>>>>>> 1c0ed754f1f87fd0bd7de997086819b8e2a95873
+1,None,None,,,0,,,,,deepfake2.png,Cyber Attack,10,7,0,15.0,10.0,34,41.0,real6.png,Safe,,,0,,,,
+1,deepfake6.png,Cyber Attack,10,7,0,15.0,10.0,34,41.0,real7.png,Cyber Attack,,,0,,,,,None,None,,,0,,,,
+2,deepfake7.png,Cyber Attack,,,0,,,,,None,None,,,0,,,,,real6.png,Safe,10,10,0,10.0,0,36.0,46.0
+3,real8.png,Safe,,,0,,,,,real7.png,Safe,10,10,0,10.0,0,35.0,45.0,deepfake1.png,Cyber Attack,,,0,,,,
+4,real4.png,Safe,10,15,0,15.0,0,35.0,50.0,real9.png,Safe,,,0,,,,,real8.png,Cyber Attack,,,0,,,,
+5,real9.png,Safe,,,0,,,,,deepfake6.png,Cyber Attack,10,5,0,10.0,10.0,39.0,44.0,real7.png,Cyber Attack,,,0,,,,
+6,deepfake4.png,Safe,10,15,0,15.0,0,31.0,46.0,real6.png,Safe,,,0,,,,,deepfake5.png,Cyber Attack,,,0,,,,
+7,deepfake5.png,Cyber Attack,10,7,0,15.0,10.0,33.0,40.0,None,None,,,0,,,,,deepfake6.png,Cyber Attack,,,0,,,,
+1,None,None,,,0,,,,,real9.png,Safe,,,0,,,,,deepfake7.png,Safe,10,10,0,10.0,0,38,48.0
+2,None,None,,,0,,,,,real8.png,Safe,10,15,0,15.0,0,35.0,50.0,real9.png,Safe,,,0,,,,
+1,deepfake5.png,Cyber Attack,,,0,,,,,deepfake4.png,Cyber Attack,,,0,,,,,deepfake7.png,Cyber Attack,20,5,0,10.0,10.0,36,41.0
+1,None,None,,,0,,,,,deepfake4.png,Cyber Attack,,,0,,,,,deepfake6.png,Cyber Attack,10,5,0,10.0,10.0,28,33.0
+2,deepfake6.png,Cyber Attack,,,0,,,,,deepfake5.png,Cyber Attack,,,0,,,,,deepfake9.png,Cyber Attack,20,5,0,10.0,10.0,20.0,25.0
+3,None,None,,,0,,,,,real4.png,Safe,,,0,,,,,deepfake4.png,Cyber Attack,10,5,0,10.0,10.0,17.0,22.0
+4,real7.png,Safe,,,0,,,,,real4.png,Safe,10,10,0,10.0,0,17.0,27.0,real7.png,Safe,,,0,,,,
+5,real4.png,Safe,,,0,,,,,deepfake3.png,Cyber Attack,,,0,,,,,deepfake8.png,Cyber Attack,20,5,0,10.0,10.0,19.0,24.0
+6,deepfake7.png,Safe,,,0,,,,,deepfake6.png,Cyber Attack,20,10,0,20.0,10.0,12.0,22.0,None,None,,,0,,,,
+7,deepfake5.png,Cyber Attack,10,7,0,15.0,10.0,15.0,22.0,deepfake1.png,Safe,,,0,,,,,None,None,,,0,,,,
+1,deepfake3.png,Cyber Attack,,,0,,,,,None,None,,,0,,,,,deepfake4.png,Cyber Attack,20,10,0,20.0,10.0,22,32.0
+2,real7.png,Safe,,,0,,,,,deepfake7.png,Cyber Attack,,,0,,,,,deepfake4.png,Safe,20,10,0,10.0,0,26.0,36.0
+1,real7.png,Cyber Attack,,,0,,,,,None,None,,,0,,,,,deepfake9.png,Cyber Attack,20,10,0,20.0,10.0,26,36.0
+2,deepfake1.png,Cyber Attack,,,0,,,,,real8.png,Safe,20,20,0,20.0,0,21.0,41.0,deepfake6.png,Cyber Attack,,,0,,,,
+3,real4.png,Safe,,,0,,,,,deepfake4.png,Cyber Attack,20,10,0,20.0,10.0,31.0,41.0,real4.png,Cyber Attack,,,0,,,,
+4,deepfake9.png,Cyber Attack,,,0,,,,,None,None,,,0,,,,,real4.png,Safe,20,20,0,20.0,0,28.0,48.0
