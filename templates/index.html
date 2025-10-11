@@ -541,6 +541,24 @@
                 }
     </style>
     <script type="text/javascript" src="/static/js/TobiiWeb_Client.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+    function captureAndSendScreenshot(trial) {
+        html2canvas(document.body).then(function(canvas) {
+            var imageData = canvas.toDataURL('image/png');
+            fetch('/upload_screenshot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: imageData, trial: trial })
+            }).then(response => response.json())
+              .then(data => console.log('Caption:', data.caption));
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        var trial = {{ trial|tojson }};
+        captureAndSendScreenshot(trial);
+    });
+    </script>
 </head>
 <body>
     <div class="header">
@@ -791,47 +809,5 @@
         };
     })();
     </script>
-    <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Log mouse movement (already present)
-    document.addEventListener('mousemove', function(e) {
-        const mouseData = {
-            x: e.clientX,
-            y: e.clientY,
-            timestamp: Date.now(),
-            page: window.location.pathname,
-            event: 'move'
-        };
-        if (!window.lastMouseSend || Date.now() - window.lastMouseSend > 100) {
-            window.lastMouseSend = Date.now();
-            fetch('/mouse_data', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(mouseData)
-            });
-        }
-    });
-
-    // Log mouse clicks
-    document.addEventListener('click', function(e) {
-        const mouseData = {
-            x: e.clientX,
-            y: e.clientY,
-            timestamp: Date.now(),
-            page: window.location.pathname,
-            event: 'click'
-        };
-        fetch('/mouse_data', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(mouseData)
-        });
-    });
-});
-</script>
 </body>
 </html>
-<!-- To ensure a new row is added for each station, you must collect all kiosk data and send it to Flask.
-     The hidden inputs for all kiosks are already present in the form.
-     Now, in your Flask route (start_charging in app.py), you must read these values and build kiosks_data for append_interaction_data.
-     No further change is needed in this HTML file. The issue is in your Flask route logic. -->
