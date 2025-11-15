@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EV Charging Game Journey</title>
     <style>
+        :root { --drive-duration: 1s; } /* default, will be overridden by JS */
+
         * {
             margin: 0;
             padding: 0;
@@ -27,7 +29,7 @@
             width: 200%;
             height: 40%;
             background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><ellipse cx="20" cy="10" rx="15" ry="8" fill="rgba(255,255,255,0.4)"/><ellipse cx="40" cy="8" rx="12" ry="6" fill="rgba(255,255,255,0.3)"/><ellipse cx="70" cy="12" rx="18" ry="9" fill="rgba(255,255,255,0.35)"/></svg>') repeat-x;
-            animation: cloudDrift 20s linear infinite;
+            animation: cloudDrift var(--drive-duration) linear infinite;
             z-index: 1;
         }
 
@@ -143,7 +145,7 @@
             border-radius: 20px 20px 8px 8px;
             position: relative;
             box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            animation: carBounce 3s ease-in-out infinite;
+            animation: carBounce var(--drive-duration) ease-in-out 1; /* run once */
         }
 
         .car::before {
@@ -171,7 +173,7 @@
             border-radius: 50%;
             position: absolute;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.3);
-            animation: wheelRotate 0.5s linear infinite;
+            animation: wheelRotate calc(var(--drive-duration) / 1.5) linear infinite;
         }
 
         .wheel:first-child { left: 20px; }
@@ -210,7 +212,7 @@
                 #ffeb3b 30px, 
                 #ffeb3b 60px
             );
-            animation: roadMove 2s linear infinite;
+            animation: roadMove var(--drive-duration) linear infinite;
         }
 
         @keyframes roadMove {
@@ -226,7 +228,7 @@
             width: 300%;
             height: 40%;
             z-index: 3;
-            animation: sceneryMove 8s linear infinite;
+            animation: sceneryMove var(--drive-duration) linear 1; /* run once across scene */
         }
 
         @keyframes sceneryMove {
@@ -328,7 +330,7 @@
             top: -5px;
             left: 50%;
             transform: translateX(-50%);
-            animation: turbineRotate 1.5s linear infinite;
+            animation: turbineRotate var(--drive-duration) linear infinite;
             z-index: 2;
         }
 
@@ -384,11 +386,6 @@
             transform: translateX(-50%) translateY(-50%);
             z-index: 3;
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        @keyframes turbineRotate {
-            0% { transform: translateX(-50%) rotate(0deg); }
-            100% { transform: translateX(-50%) rotate(360deg); }
         }
 
         /* Positioning scenery items */
@@ -511,48 +508,68 @@
     </div>
 
     <script>
-        var drivingDecrement = {{ driving_decrement }};
-        var skipCharging = {{ skip_charging|tojson }};
-        var currentCharge = {{ current_charge }};
-        var finalCharge = Math.max(currentCharge - drivingDecrement, 0);
-        var totalDuration = drivingDecrement * 1000;
-        var chargeLevel = document.getElementById("chargeLevel");
-        var batteryPercentage = document.getElementById("batteryPercentage");
-        var startTime = Date.now();
+        try {
+            var drivingDecrement = {{ driving_decrement }};
+            var skipCharging = {{ skip_charging|tojson }};
+            var currentCharge = {{ current_charge }};
+            var finalCharge = Math.max(currentCharge - drivingDecrement, 0);
 
-        // Set initial charge level
-        chargeLevel.style.width = currentCharge + "%";
-        
-        function updateChargeLevel() {
-            var elapsed = Date.now() - startTime;
-            var progress = elapsed / totalDuration; // 0 to 1
-            
-            // Calculate current charge: start from currentCharge and decrease to finalCharge
-            var chargeNow = currentCharge - (progress * drivingDecrement);
-            chargeNow = Math.max(chargeNow, finalCharge); // Don't go below final charge
-            
-            chargeLevel.style.width = chargeNow + "%";
-            batteryPercentage.textContent = Math.round(chargeNow) + "%";
-            
-            // Update battery color based on charge level
-            if (chargeNow > 50) {
-                chargeLevel.style.background = "linear-gradient(45deg, #2e7d32, #4caf50, #66bb6a)";
-            } else if (chargeNow > 25) {
-                chargeLevel.style.background = "linear-gradient(45deg, #f57f17, #ffb300, #ffc107)";
+            // Force 1 second travel time (ms)
+            var totalDuration = 1000;
+            // set CSS variable so all animations use this duration
+            document.documentElement.style.setProperty('--drive-duration', totalDuration + 'ms');
+
+            var startTime = performance.now();
+            var chargeLevel = document.getElementById("chargeLevel");
+            var batteryPercentage = document.getElementById("batteryPercentage");
+
+            // ensure charge bar transition matches totalDuration
+            if (chargeLevel) {
+                chargeLevel.style.transition = 'width ' + (totalDuration/1000) + 's linear';
+                chargeLevel.style.width = currentCharge + "%";
+            }
+
+            // If DOM elements missing, still force redirect after 1s
+            if (!chargeLevel || !batteryPercentage) {
+                setTimeout(() => window.location.replace("/index" + (skipCharging ? "?skip_charging=true" : "")), totalDuration);
             } else {
-                chargeLevel.style.background = "linear-gradient(45deg, #c62828, #e53935, #f44336)";
-            }
-            
-            if (elapsed < totalDuration) {
-                requestAnimationFrame(updateChargeLevel);
-            }
-        }
-        
-        updateChargeLevel();
+                function finishJourney() {
+                    // finalize visuals
+                    chargeLevel.style.width = finalCharge + "%";
+                    batteryPercentage.textContent = Math.round(finalCharge) + "%";
+                    // force navigation (replace avoids extra history entry)
+                    window.location.replace("/index" + (skipCharging ? "?skip_charging=true" : ""));
+                }
 
-        setTimeout(() => {
-            window.location.href = "/index" + (skipCharging ? "?skip_charging=true" : "");
-        }, totalDuration);
+                function updateChargeLevel() {
+                    var now = performance.now();
+                    var elapsed = now - startTime;
+                    var progress = Math.min(elapsed / totalDuration, 1);
+
+                    var chargeNow = currentCharge - (progress * drivingDecrement);
+                    chargeNow = Math.max(chargeNow, finalCharge);
+
+                    chargeLevel.style.width = chargeNow + "%";
+                    batteryPercentage.textContent = Math.round(chargeNow) + "%";
+
+                    if (elapsed < totalDuration) {
+                        requestAnimationFrame(updateChargeLevel);
+                    } else {
+                        finishJourney();
+                    }
+                }
+
+                // start animation loop and fallback redirect
+                requestAnimationFrame(updateChargeLevel);
+                setTimeout(() => {
+                    try { finishJourney(); } catch(e) { window.location.replace("/index" + (skipCharging ? "?skip_charging=true" : "")); }
+                }, totalDuration + 200);
+            }
+        } catch (err) {
+            console.error('Driving script error:', err);
+            // Always redirect after 1s if script fails
+            setTimeout(() => window.location.replace("/index" + (typeof skipCharging !== 'undefined' && skipCharging ? "?skip_charging=true" : "")), 1000);
+        }
     </script>
 
     <script>

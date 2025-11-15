@@ -29,7 +29,7 @@ def generate_caption_gemini(image_path, prompt=None):
         img = Image.open(image_path).convert("RGB")
         content = [prompt, img]
         response = client.models.generate_content(
-            model='gemini-2.5-flash-lite',
+            model='gemini-2.5-flash',
             contents=content
         )
         return response.text

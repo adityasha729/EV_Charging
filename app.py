@@ -369,7 +369,7 @@ def initialize_csv_files():
                 'Kiosk2_SelectedImage', 'Kiosk2_SelectedAttack', 'Kiosk2_MobileUPI', 'Kiosk2_ChargeAmount', 
                 'Kiosk2_PointsChange', 'Kiosk2_ChargeCost', 'Kiosk2_CyberAttackLoss', 'Kiosk2_StartingCharge', 'Kiosk2_EndingCharge',
                 'Kiosk3_SelectedImage', 'Kiosk3_SelectedAttack', 'Kiosk3_MobileUPI', 'Kiosk3_ChargeAmount', 
-                'Kiosk3_PointsChange', 'Kiosk3_ChargeCost', 'Kiosk3_CyberAttackLoss', 'Kiosk3_StartingCharge', 'Kiosk3_EndingCharge'
+                'Kiosk3_PointsChange', 'Kiosk3_ChargeCost', 'Kiosk3_CyberAttackLoss', 'Kiosk3_StartingCharge', 'Kiosk3_EndingCharge', 'Chatbot_Response'
             ])
     
     # Mouse data CSV
@@ -591,8 +591,13 @@ def append_interaction_data(station_id, kiosks_data):
             kiosk.get('ChargeCost', ''),
             kiosk.get('CyberAttackLoss', ''),
             kiosk.get('StartingCharge', ''),
-            kiosk.get('EndingCharge', '')
+            kiosk.get('EndingCharge', ''),
         ])
+    
+    chatbot_response = kiosks_data[3].get('ChatbotResponse', '')
+    chatbot_response = chatbot_response.replace('\n', ' ').replace('\r', ' ').replace(',', ' ')
+    row.append(chatbot_response)  
+
     with open(GameConfig.INTERACTION_DATA_CSV, 'a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(row)
@@ -777,6 +782,8 @@ def index():
     send_eeg_marker(f'index_page_{trial}')
     send_eye_marker(f'index_page_{trial}')
     start_time = datetime.now()
+
+    session['chatbot_response'] = ""
     
     # Check if game should end
     if is_game_over():
@@ -889,7 +896,8 @@ def start_charging():
     
     feedback = f"{feedback} {detailed_feedback}"
     session['feedback'] = feedback
-    session['charging_time'] = charge_amount
+    # session['charging_time'] = charge_amount
+    session['charging_time'] = 1
 
     session["starting_charge"] = starting_charge
     session["ending_charge"] = ending_charge
@@ -907,6 +915,7 @@ def start_charging():
                         cyber_attack_loss=cyber_attack_loss,
                         starting_charge=starting_charge, 
                         ending_charge=ending_charge,
+                        chatbot_response = "",
                         random_numbers=session['stations'][station_id-1]['random_numbers'])
     print("DEBUG:", starting_charge, ending_charge, charge_amount)
 
@@ -977,8 +986,10 @@ def start_charging():
             'ChargeCost': charge_cost if station_id == i else '',
             'CyberAttackLoss': cyber_attack_loss if station_id == i else '',
             'StartingCharge': session.get('starting_charge', '') if station_id == i else '',
-            'EndingCharge': session.get('ending_charge', '') if station_id == i else ''
+            'EndingCharge': session.get('ending_charge', '') if station_id == i else '',
         })
+
+    kiosks_data.append({'ChatbotResponse': session.get('chatbot_response', '')})
     # Immediately append this station's data to interaction_data.csv
     append_interaction_data(trial, kiosks_data)
 
@@ -1270,7 +1281,7 @@ def send_message():
     green = KioskThresholds.GREEN
     yellow = KioskThresholds.YELLOW
     help_agent_prompt = (
-        f"You are a Help Agent for EV charging kiosks. Based on cyber attack risk, recommend the safest available kiosk for the user to use. "
+        f"You are a Help Agent for EV charging kiosks. Based on cyber attack risk, recommend the safest available kiosk for the user to use. Always address user directly. "
         f"In this scenario, user has to cross 20 stations and is at {session.get('trial',0)} station, and around 15% charge is reduced per station due to driving (Do not mention these numbers directly). The User can charge at kiosks using points (1 point = 1 charge) ."
         "Never recommend a kiosk that is occupied or unavailable. If all kiosks are risky, suggest the least risky available one or you may suggest to skip (please suggest to skip rarely, only when user has sufficient charge). "
         "Be brief (50 - 100 words), clear, Only mention the kiosk(s) and reason why they should or should not be chosen. "
@@ -1279,8 +1290,8 @@ def send_message():
         "This will be followed by the UI description of the current 3 kiosk. Similar kiosk will have similar cyberattack chances. \n"
     )
 
-    # while(SimulationConfig.ScreenshotProcessing):
-    #     pass
+    while(SimulationConfig.ScreenshotProcessing):
+        pass
 
 
     # Load charging_context from file
@@ -1408,6 +1419,7 @@ def send_message():
                 chatbot_prompt=message,
                 chatbot_suggested_kiosk=suggested_kiosk
             )
+            session['chatbot_response'] = reply_text
             return jsonify({"reply": reply_text, "colors": colors, "points": points})
         except Exception as e:
             return jsonify({"error": str(e), "points": points}), 500

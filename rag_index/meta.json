@@ -309,6 +309,56 @@
         "source": "start_charging",
         "cyber_attacked": false
       }
+    },
+    {
+      "id": "c_1_2",
+      "kiosk": "Kiosk 2",
+      "text": "Station 1 Kiosk 2 - Image: real8.png. Attack: Cyber Attack. CyberAttacked: True. Visual: A graphic of a yellow ticket with horizontal lines and dots, and the text 'No Active Promotions'. The status indicator is 'AVAILABLE'.. Anomalies: None",
+      "meta": {
+        "trial": 1,
+        "source": "start_charging",
+        "cyber_attacked": true
+      }
+    },
+    {
+      "id": "c_1_2",
+      "kiosk": "Kiosk 2",
+      "text": "Station 1 Kiosk 2 - Image: real8.png. Attack: Cyber Attack. CyberAttacked: True. Visual: A graphic of a yellow ticket with horizontal lines and dots, and the text 'No Active Promotions'. The status indicator is 'AVAILABLE'.. Anomalies: None",
+      "meta": {
+        "trial": 1,
+        "source": "start_charging",
+        "cyber_attacked": true
+      }
+    },
+    {
+      "id": "c_2_2",
+      "kiosk": "Kiosk 2",
+      "text": "Station 2 Kiosk 2 - Image: real7.png. Attack: Safe. CyberAttacked: False. Visual: A promotional graphic with \"SAVE 20% OFF YOUR FIRST CHARGE\" text, an image of a dark gray EV, and a code \"EVSTART20\" with a \"COPY CODE\" button.. Anomalies: The discount of 20% for the first charge is a common legitimate offer. The branding \"ChargeHub\" appears to be legitimate. There are no immediate visual cues suggesting a deepfake or AI-generated image.",
+      "meta": {
+        "trial": 2,
+        "source": "start_charging",
+        "cyber_attacked": false
+      }
+    },
+    {
+      "id": "c_1_1",
+      "kiosk": "Kiosk 1",
+      "text": "Station 1 Kiosk 1 - Image: real6.png. Attack: Safe. CyberAttacked: False. Visual: A green box containing the \"chargers\" logo, text \"Get 10% Discount On Your Order\", instructions to copy code and shop at \"evchargers.com.au\", and a button with the code \"BF10\" and \"Tap To Copy\".. Anomalies: None",
+      "meta": {
+        "trial": 1,
+        "source": "start_charging",
+        "cyber_attacked": false
+      }
+    },
+    {
+      "id": "c_1_3",
+      "kiosk": "Kiosk 3",
+      "text": "Station 1 Kiosk 3 - Image: deepfake4.png. Attack: Safe. CyberAttacked: False. Visual: Large green rectangular box with prominent text '10%' and an icon of an EV plugged into a charging station. Below this, it says 'SAVE MONEY ON CHARGING'.. Anomalies: None",
+      "meta": {
+        "trial": 1,
+        "source": "start_charging",
+        "cyber_attacked": false
+      }
     }
   ],
   "model_name": "all-MiniLM-L6-v2"
