@@ -7,11 +7,18 @@ import random
 import csv
 import os
 from datetime import datetime, timezone
-# Install: pip install selenium pillow
-# from selenium import webdriver
-# from transformers import BlipProcessor, BlipForConditionalGeneration
 import base64
-# from PIL import Image
+from vision_utils import generate_caption_gemini
+from rag import RAGStore
+import threading
+import time
+from datetime import datetime as _dt
+from eyetrax import GazeEstimator
+import cv2
+import json
+import os
+import numpy as np
+
 
 
 # ==================== CONFIGURATION PARAMETERS ====================
@@ -30,7 +37,7 @@ class GameConfig:
     SETUP_CSV = 'setup.csv'
     DEMOGRAPHICS_CSV = 'demographics.csv'
     USER_INTERACTIONS_CSV = 'user_interactions.csv'
-    EYE_DATA_CSV = 'eye_data.csv'
+    EYE_DATA_CSV = 'eye_cam_tracking/eye_data.csv'
     HELP_REQUESTS_CSV = 'help_requests.csv'
     EEG_DATA_CSV = 'eeg_data.csv'
     INTERACTION_DATA_CSV = 'interaction_data.csv'
@@ -61,15 +68,17 @@ class GameConfig:
     # File extensions
     ALLOWED_IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg']
 
+class SimulationConfig:
+    RAG = False  # Whether to use RAG for chatbot context
+    RAG_TOP_K = 3  # Number of similar descriptions to retrieve for RAG
+    ScreenshotProcessing = False  # Whether a screenshot is being processed
+    GazeTracking = True  # Whether gaze tracking is enabled
+
+
+
 
 # ==================== FLASK APP INITIALIZATION ====================
 
-# Import vision_utils for Gemini Vision captioning
-from vision_utils import generate_caption_gemini
-
-# Backend context to store latest screenshot description per session
-
-import json
 
 def get_participant_id():
     return session.get('participant_id', 'unknown')
@@ -121,7 +130,7 @@ app.secret_key = 'a_very_secret_random_string_1234567890!@#$%^&*()'
 # Chatbot configuration
 
 # Load model and API keys from environment variables
-import os
+
 chatbots = {
     "gemini": {
         "api_key": os.environ.get("GEMINI_API_KEY", ""),
@@ -140,6 +149,131 @@ def ensure_directories_exist():
     os.makedirs(GameConfig.DEEPFAKE_FOLDER, exist_ok=True)
     os.makedirs(GameConfig.REAL_FOLDER, exist_ok=True)
     os.makedirs('eye_data_with_marker', exist_ok=True)
+    os.makedirs('eye_cam_tracking', exist_ok=True)
+
+
+def clear_eye_data_file():
+    """Clear/initialize the eye data CSV with header on each app start."""
+    path = GameConfig.EYE_DATA_CSV
+    # ensure parent directory exists
+    parent = os.path.dirname(path)
+    if parent:
+        os.makedirs(parent, exist_ok=True)
+    with open(path, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        writer.writerow(['Timestamp', 'Timestamp (ISO 8601)', 'X', 'Y', 'Page'])
+
+
+# Global small shared state for gaze recorder to know the current page
+gaze_state = {
+    'page': 'unknown46'
+}
+gaze_state_lock = threading.Lock()
+
+gaze_context = {
+    'context': []
+}
+gaze_context_lock = threading.Lock()
+
+
+def _gaze_recorder_loop(output_path, camera_index=0, model_path="webcam_eye/gaze_model.pkl", fps=30):
+    """Background gaze recorder loop (simplified from webcam_eye/gaze_recorder.record).
+    Writes rows to `output_path` with columns: Timestamp, Timestamp (ISO 8601), X, Y, Page
+    Does not record blink data.
+    """
+    try:
+        if GazeEstimator is None or cv2 is None:
+            print("Gaze recorder: eyetrax or cv2 not available; recorder not started.")
+            return
+        estimator = GazeEstimator()
+        try:
+            estimator.load_model(model_path)
+        except Exception:
+            # model loading may fail if model not present; continue using estimator if possible
+            pass
+
+        cap = cv2.VideoCapture(camera_index)
+        if not cap.isOpened():
+            print(f"Gaze recorder: cannot open camera {camera_index}")
+            return
+
+        # Try to set a frame rate (may be ignored)
+        try:
+            cap.set(cv2.CAP_PROP_FPS, fps)
+        except Exception:
+            pass
+
+        # Open CSV and append rows
+        with open(output_path, 'a', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            # If file is empty, write header
+            if f.tell() == 0:
+                writer.writerow(['Timestamp', 'Timestamp (ISO 8601)', 'X', 'Y', 'Page'])
+
+            frame_idx = 0
+            while True:
+                ret, frame = cap.read()
+                if not ret:
+                    time.sleep(0.01)
+                    continue
+
+                # extract features and predict gaze; tolerate failures
+                x = y = None
+                try:
+                    features, blink = estimator.extract_features(frame)
+                    if features is not None:
+                        try:
+                            pred = estimator.predict([features])[0]
+                            x, y = pred
+                        except Exception:
+                            x = y = None
+                except Exception:
+                    x = y = None
+
+                # clamp/validate coordinates
+                try:
+                    screen_w = int(1920)
+                    screen_h = int(1080)
+                    buffer = int(100)
+                except Exception:
+                    screen_w, screen_h, buffer = 1920, 1080, 100
+
+                if x is not None and y is not None:
+                    if (x < -buffer) or (x > screen_w + buffer) or (y < -buffer) or (y > screen_h + buffer):
+                        x = None
+                        y = None
+                    else:
+                        x = max(0, min(int(x), screen_w))
+                        y = max(0, min(int(y), screen_h))
+
+                ts = time.time()
+                iso = _dt.now().isoformat()
+                with gaze_state_lock:
+                    page = gaze_state['page']
+                    if page[:5] == "index":
+                        with gaze_context_lock:
+                            if x is not None and y is not None:
+                                gaze_context['context'].append([x,y])
+                                
+                
+
+                # Only write sample rows when both x and y are valid (user requested)
+                if x is not None and y is not None:
+                    writer.writerow([f"{ts:.6f}", iso, int(x), int(y), page])
+                f.flush()
+                frame_idx += 1
+
+    except Exception as e:
+        print(f"Gaze recorder loop failed: {e}")
+
+
+def start_gaze_recorder_once():
+    """Start the gaze recorder background thread (idempotent)."""
+    if getattr(start_gaze_recorder_once, 'started', False):
+        return
+    start_gaze_recorder_once.started = True
+    t = threading.Thread(target=_gaze_recorder_loop, args=(GameConfig.EYE_DATA_CSV,), kwargs={'camera_index': 0, 'model_path': 'webcam_eye/gaze_model.pkl', 'fps': 30}, daemon=True)
+    t.start()
 
 def load_images():
     """Load available images from directories"""
@@ -209,15 +343,15 @@ def initialize_csv_files():
                 'Station 3 Attack', 'Station 3 Probabilities', 'Station 3 Random Numbers', 
                 'Game Start Time', 'Game End Time', 'Charge Time', 'Drive Time', 
                 'Decision Time', 'Random Numbers',
-                'Chatbot Prompt',           # <-- Add this
-                'Chatbot Suggested Kiosk'   # <-- Add this
+                'Chatbot Prompt',           
+                'Chatbot Suggested Kiosk'  
             ])
     
     # Eye data CSV
     if not os.path.exists(GameConfig.EYE_DATA_CSV):
         with open(GameConfig.EYE_DATA_CSV, 'w', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow(['Timestamp', 'Timestamp (ISO 8601)', 'X', 'Y'])
+            writer.writerow(['Timestamp', 'Timestamp (ISO 8601)', 'X', 'Y', 'Page'])
     
     # Help requests CSV
     if not os.path.exists(GameConfig.HELP_REQUESTS_CSV):
@@ -331,9 +465,44 @@ def send_eye_marker(marker):
     try:
         session['eye_marker'] = marker
         print(f"Sent marker to Eye: {marker}")
+        # Also update the eye-cam page label used by the gaze recorder
+        try:
+            send_eye_cam_marker(marker)
+        except Exception:
+            # defensive: continue even if updating cam label fails
+            pass
         update_eye_data_with_marker(marker)
     except Exception as e:
         print(f"Eye marker request failed: {e}")
+
+
+def send_eye_cam_marker(marker):
+    """Set the gaze recorder's page label directly to `marker`.
+
+    This simplified function stores the marker in session (if available) and writes
+    the marker string into `gaze_state['page']` under a lock. The recorder will tag
+    subsequent samples with this value.
+    """
+    try:
+        try:
+            session['eye_cam_marker'] = marker
+        except Exception:
+            pass
+
+        page_label = marker if marker is not None else 'Error_Unknown'
+        page_label = str(page_label).lstrip('/')
+        if page_label == '':
+            page_label = 'root'
+
+        with gaze_state_lock:
+            gaze_state['page'] = page_label
+            if page_label[:5] == "index":
+                with gaze_context_lock:
+                    gaze_context['context'] = []  # reset context for new index page
+            print(f"Updated gaze_state page -> {gaze_state['page']}")
+        print(page_label)
+    except Exception as e:
+        print(f"send_eye_cam_marker failed: {e}")
 
 def update_eeg_data_with_marker(marker):
     """Update EEG data file with marker"""
@@ -394,8 +563,8 @@ def log_user_interaction(event, trial, **kwargs):
             'station_2_probabilities', 'station_2_random_numbers', 'station_3_status', 'station_3_image',
             'station_3_attack', 'station_3_probabilities', 'station_3_random_numbers', 'game_start_time',
             'game_end_time', 'charge_time', 'drive_time', 'decision_time', 'random_numbers',
-            'chatbot_prompt',            # <-- Add this
-            'chatbot_suggested_kiosk'    # <-- Add this
+            'chatbot_prompt',            
+            'chatbot_suggested_kiosk'  
         ]
         
         for column in expected_columns:
@@ -403,7 +572,7 @@ def log_user_interaction(event, trial, **kwargs):
         
         writer.writerow(row)
 
-# Add this function after log_user_interaction and before the Flask routes
+
 def append_interaction_data(station_id, kiosks_data):
     """
     Append a row to interaction_data.csv for the current station.
@@ -428,11 +597,97 @@ def append_interaction_data(station_id, kiosks_data):
         writer = csv.writer(file)
         writer.writerow(row)
 
+
+
+def get_charging_page_sections():
+    # Define rectangles as (x1_pct, y1_pct, x2_pct, y2_pct)
+    return {        
+        "kiosk_1": (0, 0, 0.23, 1.0),
+        "kiosk_2": (0.23, 0.0, 0.46, 1.0),
+        "kiosk_3": (0.46, 0.0, 0.69, 1.0),
+        "battery_container": (0.69, 0.0, 1.0, 1.0),
+    }
+
+def point_in_rect(x, y, rect, width=1920, height=1080):
+    x1_pct, y1_pct, x2_pct, y2_pct = rect
+    x1, y1, x2, y2 = x1_pct * width, y1_pct * height, x2_pct * width, y2_pct * height
+    return x >= x1 and x <= x2 and y >= y1 and y <= y2
+
+def map_gaze_to_section(x, y, screen_width=1920, screen_height=1080):
+    sections = get_charging_page_sections()
+    for name, rect in sections.items():
+        if name == "unknown":
+            continue
+        if point_in_rect(x, y, rect, screen_width, screen_height):
+            return name
+    return "unknown"
+
+def map_numpy_gaze_array(coords, screen_w=1920, screen_h=1080, detect_normalized=True):
+    """
+    Map an array-like of gaze points to section names.
+    coords: array-like shape (N,2) with columns [x, y].
+      - If values look normalized (max <= 1.0) and detect_normalized is True,
+        they will be scaled to pixels using screen_w/screen_h.
+      - Otherwise treated as pixel coordinates.
+    Returns: list of section names (length N).
+    """
+    
+    a = np.asarray(coords)
+    if a.ndim != 2 or a.shape[1] < 2:
+        raise ValueError("coords must be shape (N,2)")
+    xs = a[:, 0].astype(float)
+    ys = a[:, 1].astype(float)
+    if detect_normalized:
+        try:
+            if np.nanmax(xs) <= 1.0 and np.nanmax(ys) <= 1.0:
+                xs = xs * screen_w
+                ys = ys * screen_h
+        except Exception:
+            pass
+    sections = [map_gaze_to_section(float(x), float(y), screen_w, screen_h) for x, y in zip(xs, ys)]
+    return sections
+
+def gaze_data_to_section_percentage(gaze_data, screen_w=1920, screen_h=1080):
+    section_counts = {
+        "kiosk_1": 0,
+        "kiosk_2": 0,
+        "kiosk_3": 0,
+        "battery_container": 0,
+        "unknown": 0
+    }
+    total_count = 0
+    
+    sections = map_numpy_gaze_array(gaze_data, screen_w, screen_h)
+    
+    for section in sections:
+        if section in section_counts:
+            section_counts[section] += 1
+        else:
+            section_counts["unknown"] += 1
+        total_count += 1
+    
+    if total_count == 0:
+        return {k: 0.0 for k in section_counts.keys()}
+    
+    section_percentages = {k: v / total_count for k, v in section_counts.items()}
+    return section_percentages
+    
+
 # ==================== INITIALIZATION ====================
 
 # Initialize directories and files
 ensure_directories_exist()
 initialize_csv_files()
+# Clear eye CSV every run (user requested)
+clear_eye_data_file()
+start_gaze_recorder_once()
+
+# Initialize RAG store (persistent)
+try:
+    rag_store = RAGStore()
+except Exception as e:
+    print(f"RAG store initialization failed: {e}")
+    rag_store = None
 
 # Load game configuration
 setup_variables = load_setup_variables()
@@ -688,6 +943,28 @@ def start_charging():
     charging_context.append(charging_event)
     save_json_file(charging_context_path, charging_context)
 
+    # Persist charging event into RAG store for later retrieval
+    try:
+        if rag_store is not None:
+            doc_text = (
+                f"Station {trial} Kiosk {station_id} - Image: {image_shown}. "
+                f"Attack: {attack}. CyberAttacked: {attack == 'Cyber Attack'}. "
+                f"Visual: {charging_event.get('visual_content','')}. Anomalies: {charging_event.get('anomalies','')}"
+            )
+            rag_doc = {
+                'id': f"c_{trial}_{station_id}",
+                'kiosk': f"Kiosk {station_id}",
+                'text': doc_text,
+                'meta': {
+                    'trial': trial,
+                    'source': 'start_charging',
+                    'cyber_attacked': bool(charging_event.get('cyber_attacked', False))
+                }
+            }
+            rag_store.add_documents([rag_doc])
+    except Exception as e:
+        print(f"RAG indexing failed during start_charging: {e}")
+
     # After processing charging, build kiosks_data for all kiosks in this station
     kiosks_data = []
     for i in range(1, 4):
@@ -939,18 +1216,15 @@ def kiosk_status():
                 'kiosk_station_attack_probability': round(kiosk_prob,2),
                 'Status': status
             }
-            print(result)
+            #print(result)
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# /////////////////////////////////////////////////////////////////////////////
+
 @app.route('/chatbot')
 def chatbot():
     """Display chatbot interface"""
-    send_eeg_marker('chatbot_page_0')
-    send_eye_marker('chatbot_page_0')
-    log_user_interaction('chatbot_page', 0)
     # Gemini is default, so put it first in the list
     bots = list(chatbots.keys())
     if 'gemini' in bots:
@@ -964,7 +1238,6 @@ def send_message():
     """Handle sending message to the selected chatbot and return station colors."""
     bot_name = request.json.get("bot") or "gemini"
     message = request.json.get("message")
-    print(bot_name)
 
     # Deduct 5 points for LLM usage
     points = session.get('points', 0)
@@ -998,12 +1271,16 @@ def send_message():
     yellow = KioskThresholds.YELLOW
     help_agent_prompt = (
         f"You are a Help Agent for EV charging kiosks. Based on cyber attack risk, recommend the safest available kiosk for the user to use. "
-        "Never recommend a kiosk that is occupied or unavailable. If all kiosks are risky, suggest the least risky available one or you may suggest to skip. "
-        "Be brief, clear, and do not mention numbers or ratios. Only mention the kiosk(s) and a short reason why they should or should not be chosen. "
+        f"In this scenario, user has to cross 20 stations and is at {session.get('trial',0)} station, and around 15% charge is reduced per station due to driving (Do not mention these numbers directly). The User can charge at kiosks using points (1 point = 1 charge) ."
+        "Never recommend a kiosk that is occupied or unavailable. If all kiosks are risky, suggest the least risky available one or you may suggest to skip (please suggest to skip rarely, only when user has sufficient charge). "
+        "Be brief (50 - 100 words), clear, Only mention the kiosk(s) and reason why they should or should not be chosen. "
         "Also give a small explanation of your recommendation based on the descriptions below. "
         "Following this you will be given previous kiosk description which the user picked and whether user had faced cyberattack. "
         "This will be followed by the UI description of the current 3 kiosk. Similar kiosk will have similar cyberattack chances. \n"
     )
+
+    # while(SimulationConfig.ScreenshotProcessing):
+    #     pass
 
 
     # Load charging_context from file
@@ -1029,11 +1306,91 @@ def send_message():
         full_prompt += f"Previous station context:\n{context_str}\n\n"
     if screenshot_context:
         full_prompt += f"Screenshot Analysis: {screenshot_context}\n\n"
-    full_prompt += f"User question: {message}"
 
+    # RAG retrieval: for each kiosk, retrieve top-3 similar stored docs above threshold
+    if(SimulationConfig.RAG):
+        try:
+            rag_retrievals = {}
+            if rag_store is not None:
+                threshold = 0.35  # baseline similarity
+                for kiosk_id in ['Kiosk 1', 'Kiosk 2', 'Kiosk 3']:
+                    # build query from screenshot_context if available for the kiosk, else use kiosk label
+                    if screenshot_context:
+                        try:
+                            sc_obj = json.loads(screenshot_context)
+                            info = sc_obj.get(kiosk_id, {})
+                            query_text = f"Visual Content: {info.get('Visual Content','')} Anomalies: {info.get('Anomalies','')}"
+                        except Exception:
+                            query_text = kiosk_id
+                    else:
+                        query_text = kiosk_id
+
+                    # retrieve candidates from RAG
+                    candidates = rag_store.search(query_text, top_k=10, score_threshold=threshold)
+                    # filter to only charging events from same kiosk
+                    filtered = []
+                    for meta, score in candidates:
+                        try:
+                            m = meta.get('meta', {})
+                            source = m.get('source')
+                            kiosk_label = meta.get('kiosk')
+                            if source == 'start_charging' and kiosk_label == kiosk_id:
+                                filtered.append((meta, score))
+                        except Exception:
+                            continue
+                    # keep top 3
+                    rag_retrievals[kiosk_id] = filtered[:3]
+
+                # Append retrieved charging-event contexts only
+                full_prompt += "Retrieved past charging events (same kiosk) from RAG (most relevant first):\n"
+                for k, items in rag_retrievals.items():
+                    if not items:
+                        continue
+                    full_prompt += f"{k}:\n"
+                    for meta, score in items:
+                        trial_meta = meta.get('meta', {}).get('trial', '?')
+                        cyber_flag = meta.get('meta', {}).get('cyber_attacked', False)
+                        full_prompt += f"- Score: {score:.2f} | Trial: {trial_meta} | CyberAttacked: {cyber_flag} | Text: {meta.get('text','')}\n"
+                full_prompt += "\n"
+        except Exception as e:
+            print(f"RAG retrieval failed in send_message: {e}")
+
+
+    if (SimulationConfig.GazeTracking):
+        gaze_data = []
+
+        with gaze_context_lock:
+            gaze_data = gaze_context['context'].copy()
+        
+        if not gaze_data:
+            print("error: no gaze data available for chatbot")
+        else:
+            gaze_percentage = gaze_data_to_section_percentage(np.array(gaze_data))
+            print("Gaze section percentages:", gaze_percentage)
+            full_prompt += "\n Below given will be the distribution of user gaze across different sections of the screen while they were viewing the kiosks. More a user viewed a section, more likely is it that user wants charge at that station or user has found an anomaly in that section.\n"
+            full_prompt += "Use this information to help guide your recommendation of the safest kiosk to use. Do mention something regarding it so that user that you have a better understanding\n"
+            full_prompt += "\nUser gaze distribution across screen sections:\n"
+            full_prompt += f"Kiosk 1: {gaze_percentage.get('kiosk_1',0)*100:.2f}%\n"
+            full_prompt += f"Kiosk 2: {gaze_percentage.get('kiosk_2',0)*100:.2f}%\n"
+            full_prompt += f"Kiosk 3: {gaze_percentage.get('kiosk_3',0)*100:.2f}%\n"
+            full_prompt += f"Battery Container & Points: {gaze_percentage.get('battery_container',0)*100:.2f}%\n"
+
+
+
+        
+
+    full_prompt += f"\nCurrent Charge = {int(session.get('charge',0))}%\n"
+    full_prompt += f"\nCurrent Points = {points}\n"
+    full_prompt += f"\nCurrent Station Number = {session.get('trial',0)}\n"
+
+    full_prompt += f"User question: {message}"
+    print(full_prompt)
+
+
+    #TODO: set suggested_kiosk based on LLM response
     suggested_kiosk = "None"
 
-    print("Full prompt to LLM:", full_prompt)
+    #print("Full prompt to LLM:", full_prompt)
 
     # Use LLM to answer
     if bot_name == "gemini":
@@ -1121,8 +1478,9 @@ def capture_station_interface(trial):
 @app.route('/upload_screenshot', methods=['POST'])
 
 def upload_screenshot():
+    SimulationConfig.ScreenshotProcessing = True
     data = request.get_json()
-    image_data = data['image'].split(',')[1]  # Remove data:image/png;base64,
+    image_data = data['image'].split(',')[1]
     trial = data.get('trial', 0)
     image_bytes = base64.b64decode(image_data)
     os.makedirs('station_screenshots', exist_ok=True)
@@ -1172,6 +1530,9 @@ def upload_screenshot():
     save_json_file(screenshot_history_path, screenshot_history)
     set_screenshot_context(description)
 
+    # NOTE: we DO NOT index raw screenshot descriptions into the RAG store here.
+    # The RAG database is intended to hold only charging events 
+    SimulationConfig.ScreenshotProcessing = False
     return jsonify({'description': description})
 
 
@@ -1187,7 +1548,8 @@ if __name__ == '__main__':
     print(f"Deepfake images loaded: {len(deepfake_images)}")
     print(f"Real images loaded: {len(real_images)}")
     print("="*60)
-    app.run(debug=True)
+    app.run(debug=False, use_reloader=False)
+
 
 
 def save_station_to_interaction_data(trial, stations):

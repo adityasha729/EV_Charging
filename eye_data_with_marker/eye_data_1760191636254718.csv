@@ -110,3 +110,109 @@ Timestamp,Timestamp (ISO 8601),X,Y,Marker
 timestamp,datetimestamp,x_axis,y_axis,driving_page_4
 Timestamp,Timestamp (ISO 8601),X,Y,Marker
 timestamp,datetimestamp,x_axis,y_axis,index_page_4
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,consent_page_0
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,consent_decision_0
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,demographics_page_0
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,demographics_submitted_0
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,instructions_page_0
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,index_page_1
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,start_charging_1
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,charging_page_1
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,disabled_charging_1
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,driving_page_1
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,index_page_1
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,start_charging_2
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,charging_page_2
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,disabled_charging_2
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,driving_page_2
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,index_page_2
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,start_charging_3
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,charging_page_3
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,disabled_charging_3
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,driving_page_3
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,index_page_3
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,start_charging_4
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,charging_page_4
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,disabled_charging_4
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,driving_page_4
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,index_page_4
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,start_charging_5
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,charging_page_5
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,disabled_charging_5
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,driving_page_5
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,index_page_5
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,start_charging_6
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,charging_page_6
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,disabled_charging_6
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,driving_page_6
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,index_page_6
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,start_charging_7
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,charging_page_7
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,disabled_charging_7
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,driving_page_7
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,index_page_7
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,start_charging_8
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,charging_page_8
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,disabled_charging_8
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,driving_page_8
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,index_page_8
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,consent_page_0
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,consent_page_0
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,consent_decision_0
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,demographics_page_0
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,demographics_submitted_0
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,instructions_page_0
+Timestamp,Timestamp (ISO 8601),X,Y,Marker
+timestamp,datetimestamp,x_axis,y_axis,index_page_1
