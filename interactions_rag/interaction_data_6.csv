@@ -1,0 +1,7 @@
+StationID,Kiosk1_SelectedImage,Kiosk1_SelectedAttack,Kiosk1_MobileUPI,Kiosk1_ChargeAmount,Kiosk1_PointsChange,Kiosk1_ChargeCost,Kiosk1_CyberAttackLoss,Kiosk1_StartingCharge,Kiosk1_EndingCharge,Kiosk2_SelectedImage,Kiosk2_SelectedAttack,Kiosk2_MobileUPI,Kiosk2_ChargeAmount,Kiosk2_PointsChange,Kiosk2_ChargeCost,Kiosk2_CyberAttackLoss,Kiosk2_StartingCharge,Kiosk2_EndingCharge,Kiosk3_SelectedImage,Kiosk3_SelectedAttack,Kiosk3_MobileUPI,Kiosk3_ChargeAmount,Kiosk3_PointsChange,Kiosk3_ChargeCost,Kiosk3_CyberAttackLoss,Kiosk3_StartingCharge,Kiosk3_EndingCharge,Chatbot_Response
+1,None,None,,,0,,,,,deepfake6.png,Cyber Attack,8603630993,25,0,50.0,10.0,39,64.0,deepfake1.png,Cyber Attack,,,0,,,,,
+2,real7.png,Safe,,,0,,,,,deepfake7.png,Safe,8603630993,40,0,40.0,0,54.0,94.0,real7.png,Safe,,,0,,,,,
+9,real9.png,Safe,8603630993,50,0,50.0,0,21.0,71.0,real6.png,Safe,,,0,,,,,real7.png,Safe,,,0,,,,,
+12,real8.png,Safe,8603630993,50,0,50.0,0,42.0,92.0,real7.png,Safe,,,0,,,,,deepfake6.png,Cyber Attack,,,0,,,,,
+18,deepfake9.png,Cyber Attack,,,0,,,,,deepfake8.png,Cyber Attack,8603630993,20,0,40.0,10.0,25.0,45.0,None,None,,,0,,,,,
+21,real6.png,Safe,8603630993,50,0,50.0,0,4.0,54.0,deepfake3.png,Cyber Attack,,,0,,,,,deepfake7.png,Cyber Attack,,,0,,,,,

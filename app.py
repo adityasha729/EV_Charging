@@ -37,10 +37,13 @@ class GameConfig:
     SETUP_CSV = 'setup.csv'
     DEMOGRAPHICS_CSV = 'demographics.csv'
     USER_INTERACTIONS_CSV = 'user_interactions.csv'
-    EYE_DATA_CSV = 'eye_cam_tracking/eye_data.csv'
+    INTERACTION_DATA_CSV = 'interactions_rag/interaction_data.csv'
+    #EYE_DATA_CSV = 'eye_cam_tracking_rag/eye_data.csv'
+    #INTERACTION_DATA_CSV = 'interactions_rag_eye/interaction_data.csv'
+    EYE_DATA_CSV = 'eye_cam_tracking_rag_eye/eye_data.csv'
     HELP_REQUESTS_CSV = 'help_requests.csv'
     EEG_DATA_CSV = 'eeg_data.csv'
-    INTERACTION_DATA_CSV = 'interaction_data.csv'
+    
     
     # Default game parameters (will be overridden by setup.csv if available)
     DEFAULT_STARTING_POINTS = 1000
@@ -69,7 +72,7 @@ class GameConfig:
     ALLOWED_IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg']
 
 class SimulationConfig:
-    RAG = False  # Whether to use RAG for chatbot context
+    RAG = True  # Whether to use RAG for chatbot context
     RAG_TOP_K = 3  # Number of similar descriptions to retrieve for RAG
     ScreenshotProcessing = False  # Whether a screenshot is being processed
     GazeTracking = True  # Whether gaze tracking is enabled
@@ -166,7 +169,7 @@ def clear_eye_data_file():
 
 # Global small shared state for gaze recorder to know the current page
 gaze_state = {
-    'page': 'unknown46'
+    'page': 'unknown'
 }
 gaze_state_lock = threading.Lock()
 
@@ -250,6 +253,8 @@ def _gaze_recorder_loop(output_path, camera_index=0, model_path="webcam_eye/gaze
                 iso = _dt.now().isoformat()
                 with gaze_state_lock:
                     page = gaze_state['page']
+                    if page == 'unknown':
+                        continue  # skip writing unknown page samples
                     if page[:5] == "index":
                         with gaze_context_lock:
                             if x is not None and y is not None:
@@ -1395,7 +1400,10 @@ def send_message():
     full_prompt += f"\nCurrent Station Number = {session.get('trial',0)}\n"
 
     full_prompt += f"User question: {message}"
-    print(full_prompt)
+    print("----------------------------------------------------")
+    for i in range(0, len(full_prompt), 500):
+        print(full_prompt[i:i+500])
+    print("----------------------------------------------------")
 
 
     #TODO: set suggested_kiosk based on LLM response

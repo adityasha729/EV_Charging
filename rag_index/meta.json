@@ -1,29 +1,29 @@
 {
   "metadatas": [
     {
-      "id": "c_1_2",
-      "kiosk": "Kiosk 2",
-      "text": "Station 1 Kiosk 2 - Image: real8.png. Attack: Safe. CyberAttacked: False. Visual: The promotion area features a graphic with 'ElectroCharge' branding. It displays 'UNLOCK HUGE SAVINGS' and 'GET 30% OFF ALL CHARGES THIS MONTH' with 'Limited-time offer for ElectroCharge members'. An image of a silver SUV (EV) is shown charging. A coupon code area 'CHARGE30' with an 'APPLY NOW' button is visible, along with 'Terms & Conditions Apply'. Above this graphic, there's text stating 'Special 10% Discount Available!'.. Anomalies: Yes. There is a clear inconsistency between the 'Special 10% Discount Available!' text displayed above the promotion graphic and the 'GET 30% OFF ALL CHARGES THIS MONTH' headline within the graphic. This discrepancy could be a UI error or a deliberate tactic to mislead users with an exaggerated discount, which is a potential sign of a phishing attempt or deceptive practice.",
+      "id": "c_2_1",
+      "kiosk": "Kiosk 1",
+      "text": "Station 2 Kiosk 1 - Image: deepfake9.png. Attack: Safe. CyberAttacked: False. Visual: A comic-book style coupon graphic featuring a blue electric sports car at a charging station. Text includes 'ZAP!', '20% OFF EV CHARGE!', 'SUPERCHARGE YOUR RIDE!', 'Valid for 1 time use', and 'Scan to redeem', along with a barcode graphic.. Anomalies: The promotional banner states 'Special 10% Discount Available!' while the coupon itself advertises '20% OFF', creating a direct inconsistency in the discount value. The cartoonish, retro branding ('ZAP!', 'SUPERCHARGE YOUR RIDE!') is unconventional for an EV charging service, which often uses more professional or sleek designs, suggesting a potentially unofficial or tampered promotion. No explicit deepfake or AI-generated image markers are present, but the stylistic clash and discount discrepancy are suspicious.",
       "meta": {
-        "trial": 1,
+        "trial": 2,
         "source": "start_charging",
         "cyber_attacked": false
       }
     },
     {
-      "id": "c_3_2",
-      "kiosk": "Kiosk 2",
-      "text": "Station 3 Kiosk 2 - Image: deepfake1.png. Attack: Safe. CyberAttacked: False. Visual: A light gray box with a dashed border contains a golden/yellow graphic resembling a perforated ticket or coupon. Below this graphic, the text 'No Active Promotions' is displayed.. Anomalies: None. The content explicitly states 'No Active Promotions', which is a standard operational message for an available kiosk without current offers.",
+      "id": "c_3_3",
+      "kiosk": "Kiosk 3",
+      "text": "Station 3 Kiosk 3 - Image: deepfake5.png. Attack: Cyber Attack. CyberAttacked: True. Visual: A blue rectangular graphic promoting '10% OFF DISCOUNT ON CHARGING'. It includes a stylized icon of a lightning bolt within a square, representing charging. The text 'Special 10% Discount Available!' is also displayed above this graphic.. Anomalies: None. The graphics are simple and consistent in style with Kiosk 1, and the text is clear.",
       "meta": {
         "trial": 3,
         "source": "start_charging",
-        "cyber_attacked": false
+        "cyber_attacked": true
       }
     },
     {
       "id": "c_4_3",
       "kiosk": "Kiosk 3",
-      "text": "Station 4 Kiosk 3 - Image: real8.png. Attack: Cyber Attack. CyberAttacked: True. Visual: A light grey rectangular area with a dashed border contains a small golden-yellow graphic resembling a coupon or ticket, featuring two vertical lines and two small circles on its right side. Below this graphic, the text \"No Active Promotions\" is displayed.. Anomalies: None. The content is generic and explicitly states no active promotions, which is not suspicious.",
+      "text": "Station 4 Kiosk 3 - Image: deepfake8.png. Attack: Cyber Attack. CyberAttacked: True. Visual: . Anomalies: ",
       "meta": {
         "trial": 4,
         "source": "start_charging",
@@ -31,9 +31,9 @@
       }
     },
     {
-      "id": "c_5_2",
-      "kiosk": "Kiosk 2",
-      "text": "Station 5 Kiosk 2 - Image: real6.png. Attack: Safe. CyberAttacked: False. Visual: A promotional message from 'EVChargers' offering a '10% Discount On Your Order'. It instructs the user to 'Copy the code and shop at evchargers.com.au'. A discount code 'BF10' is displayed with a 'Tap To Copy' button.. Anomalies: The promotion directs users to an external website, 'evchargers.com.au'. Without verification that this domain belongs to the legitimate charging network or a trusted partner, this could be a phishing attempt designed to redirect users to a fraudulent site to steal personal or payment information. The generic 'EVChargers' branding also raises a red flag.",
+      "id": "c_5_1",
+      "kiosk": "Kiosk 1",
+      "text": "Station 5 Kiosk 1 - Image: real8.png. Attack: Safe. CyberAttacked: False. Visual: Promotion card with 'ElectroCharge' logo. Text includes 'UNLOCK HUGE SAVINGS', 'GET 30% OFF ALL CHARGES THIS MONTH', and 'Limited-time offer for ElectroCharge members.' An image shows a silver electric SUV parked near a charging station. A coupon code 'CHARGE30' is displayed with an 'APPLY NOW' button. Small text below mentions 'Terms & conditions apply. www.electrocharge.com/promos only' (partially visible). There are no QR codes or faces.. Anomalies: The branding 'ElectroCharge' in this kiosk differs from the 'ChargeHub' branding seen in Kiosks 2 and 3. While a multi-partner platform can host different brands, this inconsistency could be a potential attack vector if content from one brand were compromised or spoofed under another's legitimate branding. The 'Special 10% Discount Available!' banner also appears above the 30% off coupon, which might cause slight ambiguity regarding the total discount amount. However, no immediate signs of deepfake images, overtly unrealistic discounts, or phishing prompts are present.",
       "meta": {
         "trial": 5,
         "source": "start_charging",
@@ -41,29 +41,19 @@
       }
     },
     {
-      "id": "c_6_2",
+      "id": "c_7_2",
       "kiosk": "Kiosk 2",
-      "text": "Station 6 Kiosk 2 - Image: deepfake5.png. Attack: Cyber Attack. CyberAttacked: True. Visual: A large blue rectangular graphic displaying bold white text '10% OFF DISCOUNT ON CHARGING' with a white lightning bolt/charging icon next to '10% OFF'.. Anomalies: None. The visual content is clear, concise, and consistent with the 'Special 10% Discount Available!' header.",
-      "meta": {
-        "trial": 6,
-        "source": "start_charging",
-        "cyber_attacked": true
-      }
-    },
-    {
-      "id": "c_7_1",
-      "kiosk": "Kiosk 1",
-      "text": "Station 7 Kiosk 1 - Image: deepfake8.png. Attack: Cyber Attack. CyberAttacked: True. Visual: A graphic resembling a coupon or gift card is displayed. It features two generic white electric vehicles (an SUV/hatchback and a sedan). Text on the graphic reads '10% DISCOOUNT EV CODE' and '10% EV REWARD', along with generic barcodes. A lightning bolt EV logo is also present. Above this, a yellow banner states 'Special 10% Discount Available!'.. Anomalies: The word 'DISCOUNT' is misspelled as 'DISCOOUNT' on the coupon graphic. This deliberate misspelling is a common technique used in phishing or scam attempts to bypass filters or confuse users.",
+      "text": "Station 7 Kiosk 2 - Image: real9.png. Attack: Safe. CyberAttacked: False. Visual: A rectangular graphic displaying 'ChargeHub' branding at the top. The central image depicts a modern white SUV connected to an EV charging station in a well-lit setting. Text beneath the brand states 'SAVE 20% OFF YOUR FIRST CHARGE', followed by 'Valid for new users only | Limited time offer'. A coupon code 'EVSTART20' is presented with a 'COPY CODE' button. A small, somewhat blurry URL 'chargehub.com/promos' is visible at the bottom.. Anomalies: None. The discount (20% off for the first charge for new users) is a common and realistic incentive. The image appears authentic with no signs of deepfake or AI generation. The branding ('ChargeHub') and its corresponding URL are consistent. While Kiosk 1 and Kiosk 2 display different brand promotions, this alone does not indicate a cyberattack, as it could be part of a multi-brand advertising strategy or platform feature.",
       "meta": {
         "trial": 7,
         "source": "start_charging",
-        "cyber_attacked": true
+        "cyber_attacked": false
       }
     },
     {
-      "id": "c_8_3",
-      "kiosk": "Kiosk 3",
-      "text": "Station 8 Kiosk 3 - Image: real6.png. Attack: Safe. CyberAttacked: False. Visual: A yellow banner stating 'Special 10% Discount Available!'. Below it, a promotion box with a logo displaying 'chargers' with a lightning bolt symbol. Text reads 'Get 10% Discount On Your Order' and 'Copy the code and shop at evchargers.com.au'. A discount code 'BF10' is presented in a dashed box with a 'Tap To Copy' button next to it.. Anomalies: The promotion directs users to an external domain, 'evchargers.com.au', for shopping. While the domain name appears relevant, its explicit affiliation with the primary 'EV Charging Network' brand is not clearly established within the interface. This could represent a phishing risk, where users are redirected to a potentially malicious site designed to mimic a legitimate e-commerce platform, aiming to steal credentials or payment information. The generic 'chargers' logo also offers limited brand authenticity verification.",
+      "id": "c_8_1",
+      "kiosk": "Kiosk 1",
+      "text": "Station 8 Kiosk 1 - Image: real4.png. Attack: Safe. CyberAttacked: False. Visual: . Anomalies: ",
       "meta": {
         "trial": 8,
         "source": "start_charging",
@@ -71,9 +61,9 @@
       }
     },
     {
-      "id": "c_9_3",
-      "kiosk": "Kiosk 3",
-      "text": "Station 9 Kiosk 3 - Image: real8.png. Attack: Safe. CyberAttacked: False. Visual: A promotional graphic displaying 'ElectroCharge' branding at the top. It announces 'UNLOCKED HUGE SAVINGS' and 'GET 30% OFF ALL CHARGES THIS MONTH', with a smaller text 'Limited-time offer for ElectroCharge members'. An image of a modern EV car next to a charging station is prominent. Below the image, there's a promo code 'CHARGE30' and an 'APPLY NOW' button, followed by a barcode-like pattern. Above this graphic, a general banner states 'Special 10% Discount Available!'.. Anomalies: Yes. Potential signs of cyberattack or malicious intent:\n1.  **Discount Inconsistency:** The general banner advertises a 'Special 10% Discount', but the promotion image offers a '30% OFF'. This significant discrepancy is a common tactic used in phishing to entice users with an exaggerated offer.\n2.  **Phishing Prompt:** The 'APPLY NOW' button, coupled with the inconsistent and attractive discount, could be designed to redirect users to an external, potentially malicious website. On such a site, users might be prompted to enter login credentials or personal information under the guise of 'applying' for the discount, leading to credential harvesting or other attacks.\n3.  **Brand Verification:** While 'ElectroCharge' sounds plausible, its legitimacy would need external verification to ensure it's not a spoofed or impersonated brand used in a cyberattack. Without context, it's a potential area of concern.",
+      "id": "c_9_2",
+      "kiosk": "Kiosk 2",
+      "text": "Station 9 Kiosk 2 - Image: real7.png. Attack: Safe. CyberAttacked: False. Visual: A yellow banner stating 'Special 10% Discount Available!' is displayed. Below it, a green-bordered card from 'ChargeHub' promotes 'SAVE 20% OFF YOUR FIRST CHARGE' for new users, valid for a limited time. The card features an image of a silver modern electric vehicle parked next to an EV charging station in a blurred urban/suburban setting. A coupon code 'EVSTART20' is shown with a 'COPY CODE' button, and a small URL 'chargerhub.com/promos' is visible at the bottom.. Anomalies: The same anomaly as Kiosk 1 is present: a discrepancy between the 'Special 10% Discount Available!' banner and the 'SAVE 20% OFF YOUR FIRST CHARGE' offer. The repetition of this inconsistency across multiple kiosks strengthens the possibility of it being a system-wide misconfiguration or a deliberate tactic. While it could be a simple display error, in a security analysis, repeated inconsistencies like this are red flags that could indicate a flaw being exploited or a subtle form of deception.",
       "meta": {
         "trial": 9,
         "source": "start_charging",
@@ -81,281 +71,61 @@
       }
     },
     {
-      "id": "c_10_2",
-      "kiosk": "Kiosk 2",
-      "text": "Station 10 Kiosk 2 - Image: deepfake4.png. Attack: Safe. CyberAttacked: False. Visual: A yellow banner displaying 'Special 10% Discount Available!'. Below this, a large green graphic shows '10%' prominently, along with a white silhouette graphic of a car connected to a charging plug, and the text 'SAVE MONEY ON CHARGING'.. Anomalies: None. The graphic is simple and not susceptible to deepfake/AI concerns. The 10% discount is realistic, and no suspicious branding or phishing prompts are observed.",
+      "id": "c_10_1",
+      "kiosk": "Kiosk 1",
+      "text": "Station 10 Kiosk 1 - Image: deepfake8.png. Attack: Cyber Attack. CyberAttacked: True. Visual: . Anomalies: ",
       "meta": {
         "trial": 10,
         "source": "start_charging",
-        "cyber_attacked": false
+        "cyber_attacked": true
       }
     },
     {
-      "id": "c_11_2",
-      "kiosk": "Kiosk 2",
-      "text": "Station 11 Kiosk 2 - Image: deepfake4.png. Attack: Cyber Attack. CyberAttacked: True. Visual: A green graphic prominently displaying '10%' in large white text, accompanied by an icon of a car (EV silhouette) and a charging plug. Below these icons, the text 'SAVE MONEY ON CHARGING' is shown. This graphic is displayed below a 'Special 10% Discount Available!' banner.. Anomalies: None. The visual content is simple, consistent with the stated 10% discount, and shows no immediate signs of deepfake imagery, unrealistic offers, phishing prompts, or suspicious branding beyond a generic promotional graphic.",
+      "id": "c_11_3",
+      "kiosk": "Kiosk 3",
+      "text": "Station 11 Kiosk 3 - Image: real6.png. Attack: Safe. CyberAttacked: False. Visual: . Anomalies: ",
       "meta": {
         "trial": 11,
         "source": "start_charging",
-        "cyber_attacked": true
+        "cyber_attacked": false
       }
     },
     {
-      "id": "c_12_3",
-      "kiosk": "Kiosk 3",
-      "text": "Station 12 Kiosk 3 - Image: deepfake5.png. Attack: Safe. CyberAttacked: False. Visual: A generic placeholder icon depicting two yellow/orange tickets, accompanied by the text 'No Active Promotions'.. Anomalies: None. The content indicates an absence of active promotions, which is not an anomaly in itself. There are no suspicious images, text, or offers to analyze.",
+      "id": "c_12_1",
+      "kiosk": "Kiosk 1",
+      "text": "Station 12 Kiosk 1 - Image: deepfake9.png. Attack: Cyber Attack. CyberAttacked: True. Visual: . Anomalies: ",
       "meta": {
         "trial": 12,
         "source": "start_charging",
-        "cyber_attacked": false
+        "cyber_attacked": true
       }
     },
     {
-      "id": "c_13_1",
-      "kiosk": "Kiosk 1",
-      "text": "Station 13 Kiosk 1 - Image: real9.png. Attack: Safe. CyberAttacked: False. Visual: A promotion banner displaying the 'ChargeHub' logo, text 'SAVE 20% OFF YOUR FIRST CHARGE' (valid for new users, limited time offer), an image of a white electric car charging at a station, a promo code 'EVSTART20' with a 'COPY CODE' button, a generic barcode graphic, and the URL 'chargerhub.com/promos'.. Anomalies: None. The offer is a common marketing strategy, the branding and URL are plausible, and the image appears to be a standard stock photo.",
-      "meta": {
-        "trial": 13,
-        "source": "start_charging",
-        "cyber_attacked": false
-      }
-    },
-    {
-      "id": "c_15_3",
-      "kiosk": "Kiosk 3",
-      "text": "Station 15 Kiosk 3 - Image: real7.png. Attack: Safe. CyberAttacked: False. Visual: A white and green promotional graphic. The top part displays 'ChargeHub' with a lightning bolt logo. The main text reads 'SAVE 20% OFF YOUR FIRST CHARGE', followed by 'Valid for new users only. Limited time offer.'. An image of a white electric sedan charging at a station is visible. At the bottom, there is a green section with the promo code 'EVSTART20' and a 'COPY CODE' button, alongside a QR code and the URL 'chargehub.com/promos'. Above this graphic, text states 'Special 10% Discount Available!'. Anomalies: The promotional offer ('SAVE 20% OFF YOUR FIRST CHARGE') is a common and realistic introductory discount for new users, and the 'ChargeHub' branding appears plausible. While the presence of a QR code and an external URL ('chargehub.com/promos') could potentially be vectors for phishing if redirected to a malicious site, there are no immediate visual anomalies to suggest this without further investigation into the domain's legitimacy. The 'Special 10% Discount Available!' banner at the top is an inconsistency given the 20% offer, but not a direct sign of a cyberattack.",
+      "id": "c_15_2",
+      "kiosk": "Kiosk 2",
+      "text": "Station 15 Kiosk 2 - Image: deepfake5.png. Attack: Cyber Attack. CyberAttacked: True. Visual: The promotion area features a large blue rectangular graphic with bold white text that reads '10% OFF DISCOUNT ON CHARGING'. A white lightning bolt graphic is positioned next to the '10% OFF' text.. Anomalies: None. The visual content is simple, clear, and consistent. The discount offered is realistic, and there are no signs of AI-generated images, phishing prompts, or suspicious branding.",
       "meta": {
         "trial": 15,
         "source": "start_charging",
-        "cyber_attacked": false
-      }
-    },
-    {
-      "id": "c_1_3",
-      "kiosk": "Kiosk 3",
-      "text": "Station 1 Kiosk 3 - Image: real9.png. Attack: Safe. CyberAttacked: False. Visual: . Anomalies: ",
-      "meta": {
-        "trial": 1,
-        "source": "start_charging",
-        "cyber_attacked": false
-      }
-    },
-    {
-      "id": "c_1_3",
-      "kiosk": "Kiosk 3",
-      "text": "Station 1 Kiosk 3 - Image: deepfake4.png. Attack: Safe. CyberAttacked: False. Visual: . Anomalies: ",
-      "meta": {
-        "trial": 1,
-        "source": "start_charging",
-        "cyber_attacked": false
-      }
-    },
-    {
-      "id": "c_2_3",
-      "kiosk": "Kiosk 3",
-      "text": "Station 2 Kiosk 3 - Image: real6.png. Attack: Safe. CyberAttacked: False. Visual: . Anomalies: ",
-      "meta": {
-        "trial": 2,
-        "source": "start_charging",
-        "cyber_attacked": false
-      }
-    },
-    {
-      "id": "c_2_3",
-      "kiosk": "Kiosk 3",
-      "text": "Station 2 Kiosk 3 - Image: real9.png. Attack: Cyber Attack. CyberAttacked: True. Visual: A promotional banner for 'ChargeHub' with the text 'SAVE 20% OFF YOUR FIRST CHARGE' and smaller text 'Valid for new users only. Limited time offer.'. Below this, there is an image of a silver electric vehicle connected to a charging station in an urban setting. A promo code 'EVSTART20' is displayed next to a 'COPY CODE' button. At the bottom, a small URL 'chargehub.com/promos' is visible along with a barcode-like graphic. Above this entire promotional image, a yellow banner states 'Special 10% Discount Available!'.. Anomalies: Potential inconsistency in discount advertising: The yellow banner at the top of the kiosk advertises a 'Special 10% Discount Available!', while the main promotional graphic within the kiosk offers 'SAVE 20% OFF YOUR FIRST CHARGE'. This discrepancy could be a sign of a misconfiguration, an error, or a deliberate attempt to mislead users, which can be a precursor to or a component of a cyberattack (e.g., bait-and-switch, or testing different phishing lures). The image of the EV and charging station appears realistic, likely a stock photo, but without further analysis, cannot be definitively ruled out as AI-generated or deepfake; however, its primary suspicious aspect is the context of the discount inconsistency.",
-      "meta": {
-        "trial": 2,
-        "source": "start_charging",
         "cyber_attacked": true
       }
     },
     {
-      "id": "c_3_3",
+      "id": "c_16_3",
       "kiosk": "Kiosk 3",
-      "text": "Station 3 Kiosk 3 - Image: deepfake2.png. Attack: Safe. CyberAttacked: False. Visual: . Anomalies: ",
+      "text": "Station 16 Kiosk 3 - Image: real6.png. Attack: Safe. CyberAttacked: False. Visual: . Anomalies: ",
       "meta": {
-        "trial": 3,
+        "trial": 16,
         "source": "start_charging",
         "cyber_attacked": false
       }
     },
     {
-      "id": "c_4_3",
-      "kiosk": "Kiosk 3",
-      "text": "Station 4 Kiosk 3 - Image: real7.png. Attack: Safe. CyberAttacked: False. Visual: . Anomalies: ",
-      "meta": {
-        "trial": 4,
-        "source": "start_charging",
-        "cyber_attacked": false
-      }
-    },
-    {
-      "id": "c_5_3",
-      "kiosk": "Kiosk 3",
-      "text": "Station 5 Kiosk 3 - Image: deepfake6.png. Attack: Cyber Attack. CyberAttacked: True. Visual: . Anomalies: ",
-      "meta": {
-        "trial": 5,
-        "source": "start_charging",
-        "cyber_attacked": true
-      }
-    },
-    {
-      "id": "c_1_3",
-      "kiosk": "Kiosk 3",
-      "text": "Station 1 Kiosk 3 - Image: real6.png. Attack: Safe. CyberAttacked: False. Visual: Logo for 'chargers'. Text: 'Get 10% Discount On Your Order Copy the code and shop at evchargers.com.au'. A dashed box containing the code 'BF10' and a button that says 'Tap To Copy'.. Anomalies: None",
-      "meta": {
-        "trial": 1,
-        "source": "start_charging",
-        "cyber_attacked": false
-      }
-    },
-    {
-      "id": "c_3_3",
-      "kiosk": "Kiosk 3",
-      "text": "Station 3 Kiosk 3 - Image: deepfake3.png. Attack: Cyber Attack. CyberAttacked: True. Visual: A promotional banner displaying '10% OFF EV CHARGING SAVE ON EV CHARGING'. It features a green electric car graphic and stylized lightning bolts. Below this, there are input fields for 'Mobile/UPI ID' and 'Charge Amount (Points)', and a 'Start Charging' button.. Anomalies: None",
-      "meta": {
-        "trial": 3,
-        "source": "start_charging",
-        "cyber_attacked": true
-      }
-    },
-    {
-      "id": "c_4_3",
-      "kiosk": "Kiosk 3",
-      "text": "Station 4 Kiosk 3 - Image: real7.png. Attack: Safe. CyberAttacked: False. Visual: A promotional image with \"ChargeHub SAVE 20% OFF YOUR FIRST CHARGE\" text, an image of a silver electric car, and a code \"EVSTART20\" with a \"COPY CODE\" button. A barcode is visible. Text indicates 'Valid for new users only. Limited time offer.'. Anomalies: None",
-      "meta": {
-        "trial": 4,
-        "source": "start_charging",
-        "cyber_attacked": false
-      }
-    },
-    {
-      "id": "c_5_3",
-      "kiosk": "Kiosk 3",
-      "text": "Station 5 Kiosk 3 - Image: real7.png. Attack: Cyber Attack. CyberAttacked: True. Visual: An image depicting a silver electric car charging at a station. Text reads 'SAVE 20% OFF YOUR FIRST CHARGE' and 'EVSTART20 COPY CODE'. Below the code is a URL 'chargehub.com/promos' and a QR code.. Anomalies: None",
-      "meta": {
-        "trial": 5,
-        "source": "start_charging",
-        "cyber_attacked": true
-      }
-    },
-    {
-      "id": "c_6_3",
-      "kiosk": "Kiosk 3",
-      "text": "Station 6 Kiosk 3 - Image: deepfake5.png. Attack: Cyber Attack. CyberAttacked: True. Visual: Large text displaying \"10% OFF DISCOUNT ON CHARGING\" with a graphic of an electric plug within a green box.. Anomalies: None",
-      "meta": {
-        "trial": 6,
-        "source": "start_charging",
-        "cyber_attacked": true
-      }
-    },
-    {
-      "id": "c_7_3",
-      "kiosk": "Kiosk 3",
-      "text": "Station 7 Kiosk 3 - Image: deepfake9.png. Attack: Cyber Attack. CyberAttacked: True. Visual: A bright, colorful coupon-like image with the text 'ZAP! 20% OFF EV CHARGE! SUPERCHARGE YOUr RIDE!'. It features an illustration of a blue electric car and a charging station. There is also a barcode visible at the bottom of the coupon.. Anomalies: None",
-      "meta": {
-        "trial": 7,
-        "source": "start_charging",
-        "cyber_attacked": true
-      }
-    },
-    {
-      "id": "c_1_2",
+      "id": "c_21_2",
       "kiosk": "Kiosk 2",
-      "text": "Station 1 Kiosk 2 - Image: deepfake4.png. Attack: Cyber Attack. CyberAttacked: True. Visual: A green box with a graphic of an electric car and a charging plug. Text reads '10%' and 'SAVE MONEY ON CHARGING'.. Anomalies: None",
+      "text": "Station 21 Kiosk 2 - Image: real9.png. Attack: Safe. CyberAttacked: False. Visual: . Anomalies: ",
       "meta": {
-        "trial": 1,
-        "source": "start_charging",
-        "cyber_attacked": true
-      }
-    },
-    {
-      "id": "c_2_1",
-      "kiosk": "Kiosk 1",
-      "text": "Station 2 Kiosk 1 - Image: real4.png. Attack: Safe. CyberAttacked: False. Visual: A green graphic showing an EV charging at a station, with text '10% off EV charging' and 'Gojek driver-partners enjoy upfront EV charging discounts!' The graphic also displays logos for 'Gojek' and 'CD ENGIC'. Below this, there are input fields for 'Mobile/UPI ID' and 'Charge Amount (Points)', and a 'Start Charging' button.. Anomalies: None",
-      "meta": {
-        "trial": 2,
-        "source": "start_charging",
-        "cyber_attacked": false
-      }
-    },
-    {
-      "id": "c_3_1",
-      "kiosk": "Kiosk 1",
-      "text": "Station 3 Kiosk 1 - Image: real8.png. Attack: Safe. CyberAttacked: False. Visual: A promotional image with the text 'ElectroCharge' and 'UNLOCK HUGE SAVINGS GET 30% OFF ALL CHARGES THIS MONTH'. It features an image of an electric car and a charging station. Below this, the text 'CHARGE30 APPLY NOW' is displayed.. Anomalies: The discount of '30% OFF' combined with the generic savings message and the call to action 'APPLY NOW' could be indicative of a phishing attempt or a social engineering tactic to lure users into providing personal information or clicking a malicious link if this were a real-time interface. However, based solely on the visual, it's a standard promotion format. No clear signs of deepfake or AI-generated images are present.",
-      "meta": {
-        "trial": 3,
-        "source": "start_charging",
-        "cyber_attacked": false
-      }
-    },
-    {
-      "id": "c_4_2",
-      "kiosk": "Kiosk 2",
-      "text": "Station 4 Kiosk 2 - Image: real9.png. Attack: Cyber Attack. CyberAttacked: True. Visual: Image of a silver electric car charging at a station, text 'SAVE 20% OFF YOUR FIRST CHARGE', 'Valid for new users only. Limited time offer.', a promotional code 'EVSTART20', a 'COPY CODE' button, and a QR code. The kiosk status is 'AVAILABLE' and there's a banner saying 'Special 10% Discount Available!'.. Anomalies: None",
-      "meta": {
-        "trial": 4,
-        "source": "start_charging",
-        "cyber_attacked": true
-      }
-    },
-    {
-      "id": "c_5_3",
-      "kiosk": "Kiosk 3",
-      "text": "Station 5 Kiosk 3 - Image: real7.png. Attack: Safe. CyberAttacked: False. Visual: A promotional card for 'ChargeHub' with the text \"SAVE 20% OFF YOUR FIRST CHARGE Valid for new users only. Limited time offer.\". It features a modern silver electric sedan parked in a charging bay. Below the image is a code \"EVSTART20\" and a \"COPY CODE\" button. The image is a high-quality render or photograph.. Anomalies: None",
-      "meta": {
-        "trial": 5,
-        "source": "start_charging",
-        "cyber_attacked": false
-      }
-    },
-    {
-      "id": "c_1_2",
-      "kiosk": "Kiosk 2",
-      "text": "Station 1 Kiosk 2 - Image: real8.png. Attack: Cyber Attack. CyberAttacked: True. Visual: A graphic of a yellow ticket with horizontal lines and dots, and the text 'No Active Promotions'. The status indicator is 'AVAILABLE'.. Anomalies: None",
-      "meta": {
-        "trial": 1,
-        "source": "start_charging",
-        "cyber_attacked": true
-      }
-    },
-    {
-      "id": "c_1_2",
-      "kiosk": "Kiosk 2",
-      "text": "Station 1 Kiosk 2 - Image: real8.png. Attack: Cyber Attack. CyberAttacked: True. Visual: A graphic of a yellow ticket with horizontal lines and dots, and the text 'No Active Promotions'. The status indicator is 'AVAILABLE'.. Anomalies: None",
-      "meta": {
-        "trial": 1,
-        "source": "start_charging",
-        "cyber_attacked": true
-      }
-    },
-    {
-      "id": "c_2_2",
-      "kiosk": "Kiosk 2",
-      "text": "Station 2 Kiosk 2 - Image: real7.png. Attack: Safe. CyberAttacked: False. Visual: A promotional graphic with \"SAVE 20% OFF YOUR FIRST CHARGE\" text, an image of a dark gray EV, and a code \"EVSTART20\" with a \"COPY CODE\" button.. Anomalies: The discount of 20% for the first charge is a common legitimate offer. The branding \"ChargeHub\" appears to be legitimate. There are no immediate visual cues suggesting a deepfake or AI-generated image.",
-      "meta": {
-        "trial": 2,
-        "source": "start_charging",
-        "cyber_attacked": false
-      }
-    },
-    {
-      "id": "c_1_1",
-      "kiosk": "Kiosk 1",
-      "text": "Station 1 Kiosk 1 - Image: real6.png. Attack: Safe. CyberAttacked: False. Visual: A green box containing the \"chargers\" logo, text \"Get 10% Discount On Your Order\", instructions to copy code and shop at \"evchargers.com.au\", and a button with the code \"BF10\" and \"Tap To Copy\".. Anomalies: None",
-      "meta": {
-        "trial": 1,
-        "source": "start_charging",
-        "cyber_attacked": false
-      }
-    },
-    {
-      "id": "c_1_3",
-      "kiosk": "Kiosk 3",
-      "text": "Station 1 Kiosk 3 - Image: deepfake4.png. Attack: Safe. CyberAttacked: False. Visual: Large green rectangular box with prominent text '10%' and an icon of an EV plugged into a charging station. Below this, it says 'SAVE MONEY ON CHARGING'.. Anomalies: None",
-      "meta": {
-        "trial": 1,
+        "trial": 21,
         "source": "start_charging",
         "cyber_attacked": false
       }
